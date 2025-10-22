@@ -1,0 +1,8 @@
+# Ignore Visual Studio specific files
+.vs/
+.vscode/
+# Ignore build directories
+bin/
+obj/
+# Ignore other common IDE-specific files
+.idea/
