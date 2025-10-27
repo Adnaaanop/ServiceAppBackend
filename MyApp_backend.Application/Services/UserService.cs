@@ -10,61 +10,53 @@ using System.Threading.Tasks;
 
 namespace MyApp_backend.Application.Services
 {
-    public class UserService : IGenericService<UserRequestDto, UserUpdateDto, UserResponseDto, User>
+    public class UserService : IGenericService<UserRequestDto, UserUpdateDto, UserResponseDto, ApplicationUser>
     {
-        private readonly IGenericRepository<User> _repository;
+        private readonly IGenericRepository<ApplicationUser> _userRepository;
         private readonly IMapper _mapper;
 
-        public UserService(IGenericRepository<User> repository, IMapper mapper)
+        public UserService(IGenericRepository<ApplicationUser> userRepository, IMapper mapper)
         {
-            _repository = repository;
+            _userRepository = userRepository;
             _mapper = mapper;
         }
 
-        // Create a new user
         public async Task<UserResponseDto> CreateAsync(UserRequestDto dto)
         {
-            var entity = _mapper.Map<User>(dto);
-            entity.PasswordHash = PasswordHelper.HashPassword(dto.Password);
-            entity.CreatedAt = DateTime.UtcNow;
-            entity.IsActive = true;
-
-            var created = await _repository.AddAsync(entity);
+            var userEntity = _mapper.Map<ApplicationUser>(dto);
+            // TODO: Hash Password before saving
+            var created = await _userRepository.AddAsync(userEntity);
             return _mapper.Map<UserResponseDto>(created);
         }
 
-        // Get all users
-        public async Task<IEnumerable<UserResponseDto>> GetAllAsync()
-        {
-            var users = await _repository.GetAllAsync();
-            return _mapper.Map<IEnumerable<UserResponseDto>>(users);
-        }
-
-        // Get user by Id
         public async Task<UserResponseDto?> GetByIdAsync(Guid id)
         {
-            var user = await _repository.GetByIdAsync(id);
-            return user == null ? null : _mapper.Map<UserResponseDto>(user);
+            var userEntity = await _userRepository.GetByIdAsync(id);
+            if (userEntity == null) return null;
+            return _mapper.Map<UserResponseDto>(userEntity);
         }
 
-        // Update user
+        public async Task<IEnumerable<UserResponseDto>> GetAllAsync()
+        {
+            var users = await _userRepository.GetAllAsync();
+            return users.Select(user => _mapper.Map<UserResponseDto>(user));
+        }
+
         public async Task<UserResponseDto?> UpdateAsync(Guid id, UserUpdateDto dto)
         {
-            var user = await _repository.GetByIdAsync(id);
-            if (user == null) return null;
+            var userEntity = await _userRepository.GetByIdAsync(id);
+            if (userEntity == null) return null;
 
-            // Map only non-null fields from DTO to entity
-            _mapper.Map(dto, user);
-            user.LastUpdatedAt = DateTime.UtcNow;
+            _mapper.Map(dto, userEntity);
+            userEntity.LastUpdatedAt = DateTime.UtcNow;
 
-            var updated = await _repository.UpdateAsync(user);
+            var updated = await _userRepository.UpdateAsync(userEntity);
             return _mapper.Map<UserResponseDto>(updated);
         }
 
-        // Soft delete user
         public async Task<bool> DeleteAsync(Guid id)
         {
-            return await _repository.DeleteAsync(id); // Soft delete handled in GenericRepository
+            return await _userRepository.DeleteAsync(id);
         }
     }
 }

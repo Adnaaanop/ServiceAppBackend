@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace MyApp_backend.Domain.Interfaces
 {
-    public interface IGenericRepository<TEntity> where TEntity : BaseEntity
+    public interface IGenericRepository<TEntity>
     {
         Task<TEntity> AddAsync(TEntity entity);
         Task<TEntity?> GetByIdAsync(Guid id);

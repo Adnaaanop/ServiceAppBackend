@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MyApp_backend.Domain.Entities;
-using MyApp_backend.Infrastructure.Identity;
 using System;
 
 namespace MyApp_backend.Infrastructure.Data

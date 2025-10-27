@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using MyApp_backend.Application.DTOs.User;
+
 using MyApp_backend.Domain.Entities;
 using MyApp_backend.Application.DTOs;
 using System;
@@ -14,24 +15,20 @@ namespace MyApp_backend.Application.Mapping
     {
         public UserProfile()
         {
-            // Create mappings
+            CreateMap<ApplicationUser, UserResponseDto>()
+               .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.AddressJson))
+           .ForMember(dest => dest.PreferredServices, opt => opt.MapFrom(src => src.PreferredServicesJson))
+           .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.PhoneNumber)); // <-- THIS LINE
 
-            // Create User from request
-            CreateMap<UserRequestDto, User>()
-            .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
-            .ForMember(dest => dest.Id, opt => opt.Ignore());
+            CreateMap<UserRequestDto, ApplicationUser>()
+                .ForMember(dest => dest.AddressJson, opt => opt.MapFrom(src => src.Address))
+                .ForMember(dest => dest.PreferredServicesJson, opt => opt.MapFrom(src => src.PreferredServices))
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Phone)); // <-- THIS LINE
 
-            // Update user from update DTO
-            CreateMap<UserUpdateDto, User>()
-                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
-
-            // Map User entity to response DTO
-            CreateMap<User, UserResponseDto>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
-
-            // Map User entity to minimal DTO
-            CreateMap<User, UserMinimalDto>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
+            CreateMap<UserUpdateDto, ApplicationUser>()
+                .ForMember(dest => dest.AddressJson, opt => opt.MapFrom(src => src.Address))
+                .ForMember(dest => dest.PreferredServicesJson, opt => opt.MapFrom(src => src.PreferredServices))
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Phone)); // <-- THIS LINE
         }
     }
 }

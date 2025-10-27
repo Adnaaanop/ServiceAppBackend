@@ -2,13 +2,19 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using MyApp_backend.Application.DTOs.User;
 using MyApp_backend.Application.Helpers;
 using MyApp_backend.Application.Interfaces;
+using MyApp_backend.Application.Mapping;
+using MyApp_backend.Application.Services;
+using MyApp_backend.Domain.Entities;
+using MyApp_backend.Domain.Interfaces;
 using MyApp_backend.Infrastructure.Data;
-using MyApp_backend.Infrastructure.Identity;
+
+using MyApp_backend.Infrastructure.Repositories;
 using MyApp_backend.Infrastructure.Services;
 using System.Text;
-using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,6 +58,15 @@ builder.Services.AddAuthentication(options =>
 // Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<JwtTokenHelper>();
+
+
+//Repository
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+//Services
+builder.Services.AddScoped<IGenericService<UserRequestDto, UserUpdateDto, UserResponseDto, ApplicationUser>, UserService>();
+//Automapper
+builder.Services.AddAutoMapper(typeof(UserProfile));
+
 
 // Swagger configuration: Enable JWT "Authorize" button and lock icons
 builder.Services.AddSwaggerGen(c =>

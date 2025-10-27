@@ -5,7 +5,7 @@ using MyApp_backend.Application.DTOs.Authentication;
 using MyApp_backend.Application.Helpers;
 using MyApp_backend.Application.Interfaces;
 using MyApp_backend.Application.Models;
-using MyApp_backend.Infrastructure.Identity;
+using MyApp_backend.Domain.Entities;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
