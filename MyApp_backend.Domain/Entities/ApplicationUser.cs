@@ -26,5 +26,9 @@ namespace MyApp_backend.Domain.Entities
         public bool IsActive { get; set; } = true;
         public DateTime? DeletedAt { get; set; }
         public Guid? LastUpdatedBy { get; set; }
+
+
+
+        public virtual ProviderProfile? ProviderProfile { get; set; }
     }
 }

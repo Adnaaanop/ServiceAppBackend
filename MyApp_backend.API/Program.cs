@@ -62,10 +62,14 @@ builder.Services.AddScoped<JwtTokenHelper>();
 
 //Repository
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IProviderRepository, ProviderRepository>();
+
 //Services
+builder.Services.AddScoped<IProviderService, ProviderService>();
 builder.Services.AddScoped<IGenericService<UserRequestDto, UserUpdateDto, UserResponseDto, ApplicationUser>, UserService>();
 //Automapper
 builder.Services.AddAutoMapper(typeof(UserProfile));
+builder.Services.AddAutoMapper(typeof(ProviderProfileMapping));
 
 
 // Swagger configuration: Enable JWT "Authorize" button and lock icons
@@ -118,4 +122,66 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+
+    string[] roles = new[] { "Admin", "Provider", "User" };
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole<Guid> { Name = role, NormalizedName = role.ToUpper() });
+        }
+    }
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+
+    // 1. Make sure "Admin" role exists (you may already have this)
+    if (!await roleManager.RoleExistsAsync("Admin"))
+        await roleManager.CreateAsync(new IdentityRole<Guid> { Name = "Admin", NormalizedName = "ADMIN" });
+
+    // 2. Create a unique GUID for admin user
+    var adminEmail = "Admin0@gmail.com";
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+    if (adminUser == null)
+    {
+        var newAdmin = new ApplicationUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            EmailConfirmed = true,
+            Name = "Super Admin",
+            IsActive = true,
+            IsVerified = true,
+            CreatedAt = DateTime.UtcNow
+            // add other fields needed for your model
+        };
+        var result = await userManager.CreateAsync(newAdmin, "Admin0@gmail.com"); // change password if needed
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(newAdmin, "Admin");
+            Console.WriteLine("Admin user created");
+        }
+        else
+        {
+            Console.WriteLine("Failed admin create: " + string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+    }
+    else
+    {
+        // Ensure user is in admin role
+        if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+        Console.WriteLine("Admin user already exists");
+    }
+}
+
+
+
 app.Run();

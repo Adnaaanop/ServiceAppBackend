@@ -14,7 +14,7 @@ namespace MyApp_backend.Application.DTOs.User
         public string? Phone { get; set; }
         public string? Address { get; set; }
         public string? PreferredServices { get; set; }
-        public string Role { get; set; } = "User";
+        public List<string> Roles { get; set; } = new List<string>();
         public bool IsVerified { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? LastUpdatedAt { get; set; }

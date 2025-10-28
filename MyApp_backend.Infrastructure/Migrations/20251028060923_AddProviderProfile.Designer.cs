@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyApp_backend.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using MyApp_backend.Infrastructure.Data;
 namespace MyApp_backend.Infrastructure.Migrations
 {
     [DbContext(typeof(MyAppDbContext))]
-    partial class MyAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251028060923_AddProviderProfile")]
+    partial class AddProviderProfile
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -260,10 +263,10 @@ namespace MyApp_backend.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("6bce84fa-0c2e-41c0-8b38-05295ae07c8d"),
+                            Id = new Guid("b7902772-af61-4c9b-ba95-e5f7ac1d7668"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "b8a3ee77-b37c-4560-8b94-065d30af7a16",
-                            CreatedAt = new DateTime(2025, 10, 28, 10, 23, 10, 18, DateTimeKind.Utc).AddTicks(217),
+                            ConcurrencyStamp = "c770c450-b2df-4f4c-887e-e8048beaa521",
+                            CreatedAt = new DateTime(2025, 10, 28, 6, 9, 22, 894, DateTimeKind.Utc).AddTicks(8511),
                             Email = "provider@example.com",
                             EmailConfirmed = true,
                             IsActive = true,
@@ -271,10 +274,10 @@ namespace MyApp_backend.Infrastructure.Migrations
                             IsVerified = true,
                             LockoutEnabled = false,
                             Name = "John Doe",
-                            PasswordHash = "AQAAAAIAAYagAAAAEG5S3B66CDMQpqydyvMQYhER29dF9QYbhRf8L6Xj6axrc4H/zpqzSl3NlsEzCMnZeg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEN44XL3xQAHtG+W4OnmeV5w2/JbGEzJnYR9ydUOV3blN4eXigvRs0X5rA3cQJsiKIg==",
                             PhoneNumber = "+1234567890",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "611de879-3815-4dfa-8b18-8670f03893cf",
+                            SecurityStamp = "aca4640b-8578-40f8-a9ad-47a7f31c9440",
                             TwoFactorEnabled = false,
                             UserName = "provider@example.com"
                         });
@@ -349,14 +352,14 @@ namespace MyApp_backend.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("6bce84fa-0c2e-41c0-8b38-05295ae07c8d"),
+                            UserId = new Guid("b7902772-af61-4c9b-ba95-e5f7ac1d7668"),
                             AvailabilityJson = "{\"monday\": [\"9-5\"]}",
                             BusinessDescription = "We provide cleaning and handyman services.",
                             BusinessName = "John's Home Services",
                             CertificateUrlsJson = "[]",
-                            CreatedAt = new DateTime(2025, 10, 28, 10, 23, 10, 55, DateTimeKind.Utc).AddTicks(8578),
+                            CreatedAt = new DateTime(2025, 10, 28, 6, 9, 22, 932, DateTimeKind.Utc).AddTicks(740),
                             DocumentUrlsJson = "[]",
-                            Id = new Guid("06bee5fb-5715-4bcd-8396-0342f813e09b"),
+                            Id = new Guid("496e191b-1692-4f5d-a634-6270be093dd8"),
                             IsActive = true,
                             IsApproved = true,
                             IsDeleted = false,

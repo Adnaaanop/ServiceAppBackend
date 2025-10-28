@@ -20,6 +20,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\MyApp_backend.Domain\MyApp_backend.Domain.csproj" />
+		
 	</ItemGroup>
 
 </Project>
