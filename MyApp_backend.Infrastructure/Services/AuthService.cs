@@ -102,7 +102,7 @@ namespace MyApp_backend.Infrastructure.Services
 
                 Console.WriteLine(profile == null
                     ? $"Provider profile NOT FOUND for UserId: {user.Id}"
-                    : $"Provider profile fetched for UserId: {user.Id} | BusinessName: {profile.BusinessName}");
+                    : $"Provider profile fetched for UserId: {user.Id} | IsApproved={profile.IsApproved}");
 
                 if (profile == null)
                 {
@@ -112,7 +112,16 @@ namespace MyApp_backend.Infrastructure.Services
                         Errors = new List<string> { "Provider profile not found. Please contact support." }
                     };
                 }
-                // No IsApproved check!
+
+                if (!profile.IsApproved)
+                {
+                    Console.WriteLine("Provider account exists but is NOT approved by admin.");
+                    return new AuthResponseDto
+                    {
+                        IsSuccess = false,
+                        Errors = new List<string> { "Your provider account is not yet approved by admin." }
+                    };
+                }
             }
 
             var userModel = await MapToUserModel(user);
