@@ -31,14 +31,24 @@ namespace MyApp_backend.Application.Services
         {
             var userEntity = _mapper.Map<ApplicationUser>(dto);
 
-            // Add user via repository (skips password hashing and some Identity logic, but works if password is not critical)
-            var created = await _userRepository.AddAsync(userEntity);
+            // Ensure UserName is set (required by Identity)
+            userEntity.UserName = userEntity.Email;
 
-            // Explicitly assign "User" role using UserManager
-            await _userManager.AddToRoleAsync(created, "User");
+            // Receive password from DTO
+            string password = dto.Password;
 
-            var dtoResult = _mapper.Map<UserResponseDto>(created);
-            dtoResult.Roles = (await _userManager.GetRolesAsync(created)).ToList();
+            // Identity handles password validation, security stamp, etc.
+            var result = await _userManager.CreateAsync(userEntity, password);
+
+            if (!result.Succeeded)
+                throw new Exception("User creation failed: " + string.Join(", ", result.Errors.Select(e => e.Description)));
+
+            // Assign the "User" role
+            await _userManager.AddToRoleAsync(userEntity, "User");
+
+            var dtoResult = _mapper.Map<UserResponseDto>(userEntity);
+            dtoResult.Roles = (await _userManager.GetRolesAsync(userEntity)).ToList();
+
             return dtoResult;
         }
 
