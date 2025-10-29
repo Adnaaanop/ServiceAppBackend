@@ -144,13 +144,6 @@ namespace MyApp_backend.Infrastructure.Services
             return new AuthResponseDto { IsSuccess = true, Token = token, RefreshToken = refreshToken };
         }
 
-
-
-
-
-
-
-
         public string GenerateToken(UserModel user) => _jwtTokenHelper.GenerateJwtToken(user);
 
         private async Task<UserModel> MapToUserModel(ApplicationUser user)

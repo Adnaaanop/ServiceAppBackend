@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MyApp_backend.Domain.Entities;
+using MyApp_backend.Domain.Entities.Catalog;
 using System;
+using System.Reflection.Emit;
 
 namespace MyApp_backend.Infrastructure.Data
 {
@@ -10,6 +12,12 @@ namespace MyApp_backend.Infrastructure.Data
     {
         public MyAppDbContext(DbContextOptions<MyAppDbContext> options) : base(options) { }
         public DbSet<ProviderProfile> ProviderProfiles { get; set; }
+        public DbSet<ServiceCategory> ServiceCategories { get; set; }
+        public DbSet<Service> Services { get; set; }
+
+
+
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -28,6 +36,45 @@ namespace MyApp_backend.Infrastructure.Data
                 .HasOne(p => p.User)
                 .WithOne(u => u.ProviderProfile)
                 .HasForeignKey<ProviderProfile>(p => p.UserId);
+
+
+
+            // ServiceCategory: Self-referencing parent-child for category hierarchy
+            builder.Entity<ServiceCategory>()
+                .HasMany(c => c.ChildCategories)
+                .WithOne(c => c.ParentCategory)
+                .HasForeignKey(c => c.ParentCategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ServiceCategory: Set length constraints and required fields
+            builder.Entity<ServiceCategory>()
+                .Property(c => c.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            // Service: Link to Provider (ApplicationUser)
+            builder.Entity<Service>()
+                .HasOne(s => s.Provider)
+                .WithMany() // Or .WithMany("Services") if you add a collection property to ApplicationUser
+                .HasForeignKey(s => s.ProviderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Service: Link to ServiceCategory
+            builder.Entity<Service>()
+                .HasOne(s => s.Category)
+                .WithMany(c => c.Services)
+                .HasForeignKey(s => s.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Optional: Set length or required constraints for Service properties
+            builder.Entity<Service>()
+                .Property(s => s.PricingJson)
+                .IsRequired();
+
+
+
+
+
 
 
             //SEEDING

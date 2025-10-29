@@ -3,12 +3,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MyApp_backend.Application.DTOs.Catalog;
 using MyApp_backend.Application.DTOs.User;
 using MyApp_backend.Application.Helpers;
 using MyApp_backend.Application.Interfaces;
 using MyApp_backend.Application.Mapping;
 using MyApp_backend.Application.Services;
 using MyApp_backend.Domain.Entities;
+using MyApp_backend.Domain.Entities.Catalog;
 using MyApp_backend.Domain.Interfaces;
 using MyApp_backend.Infrastructure.Data;
 
@@ -67,9 +69,15 @@ builder.Services.AddScoped<IProviderRepository, ProviderRepository>();
 //Services
 builder.Services.AddScoped<IProviderService, ProviderService>();
 builder.Services.AddScoped<IGenericService<UserRequestDto, UserUpdateDto, UserResponseDto, ApplicationUser>, UserService>();
+builder.Services.AddScoped<IGenericService<ServiceCategoryCreateDto, ServiceCategoryUpdateDto, ServiceCategoryResponseDto, ServiceCategory>, ServiceCategoryService>();
+builder.Services.AddScoped<IGenericService<ServiceCreateDto, ServiceUpdateDto, ServiceResponseDto, Service>, ServiceService>();
+
 //Automapper
-builder.Services.AddAutoMapper(typeof(UserProfile));
-builder.Services.AddAutoMapper(typeof(ProviderProfileMapping));
+builder.Services.AddAutoMapper(
+    typeof(UserProfile),
+    typeof(ProviderProfileMapping),
+    typeof(CatalogProfile));
+    
 
 
 // Swagger configuration: Enable JWT "Authorize" button and lock icons
