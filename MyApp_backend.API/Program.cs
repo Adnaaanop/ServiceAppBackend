@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MyApp_backend.Application.DTOs.Booking;
 using MyApp_backend.Application.DTOs.Catalog;
 using MyApp_backend.Application.DTOs.User;
 using MyApp_backend.Application.Helpers;
@@ -71,12 +72,16 @@ builder.Services.AddScoped<IProviderService, ProviderService>();
 builder.Services.AddScoped<IGenericService<UserRequestDto, UserUpdateDto, UserResponseDto, ApplicationUser>, UserService>();
 builder.Services.AddScoped<IGenericService<ServiceCategoryCreateDto, ServiceCategoryUpdateDto, ServiceCategoryResponseDto, ServiceCategory>, ServiceCategoryService>();
 builder.Services.AddScoped<IGenericService<ServiceCreateDto, ServiceUpdateDto, ServiceResponseDto, Service>, ServiceService>();
+builder.Services.AddScoped<IGenericService<BookingCreateDto, BookingUpdateDto, BookingResponseDto, Booking>, BookingService>();
+
 
 //Automapper
 builder.Services.AddAutoMapper(
     typeof(UserProfile),
     typeof(ProviderProfileMapping),
-    typeof(CatalogProfile));
+    typeof(CatalogProfile),
+    typeof(BookingProfile)
+ );
     
 
 

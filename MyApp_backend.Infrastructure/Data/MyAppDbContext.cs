@@ -14,6 +14,8 @@ namespace MyApp_backend.Infrastructure.Data
         public DbSet<ProviderProfile> ProviderProfiles { get; set; }
         public DbSet<ServiceCategory> ServiceCategories { get; set; }
         public DbSet<Service> Services { get; set; }
+        public DbSet<Booking> Bookings { get; set; }
+
 
 
 

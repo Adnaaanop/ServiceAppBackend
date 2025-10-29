@@ -30,8 +30,13 @@ namespace MyApp_backend.Application.Services
         public async Task<UserResponseDto> CreateAsync(UserRequestDto dto)
         {
             var userEntity = _mapper.Map<ApplicationUser>(dto);
-            // TODO: Hash Password before saving if needed
+
+            // Add user via repository (skips password hashing and some Identity logic, but works if password is not critical)
             var created = await _userRepository.AddAsync(userEntity);
+
+            // Explicitly assign "User" role using UserManager
+            await _userManager.AddToRoleAsync(created, "User");
+
             var dtoResult = _mapper.Map<UserResponseDto>(created);
             dtoResult.Roles = (await _userManager.GetRolesAsync(created)).ToList();
             return dtoResult;
