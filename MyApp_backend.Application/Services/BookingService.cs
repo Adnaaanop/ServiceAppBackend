@@ -25,6 +25,7 @@ namespace MyApp_backend.Application.Services
         public async Task<BookingResponseDto> CreateAsync(BookingCreateDto dto)
         {
             var entity = _mapper.Map<Booking>(dto);
+            entity.Status = string.IsNullOrEmpty(entity.Status) ? "Pending" : entity.Status;
             var created = await _repository.AddAsync(entity);
             return _mapper.Map<BookingResponseDto>(created);
         }

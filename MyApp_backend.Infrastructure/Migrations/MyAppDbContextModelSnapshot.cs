@@ -260,10 +260,10 @@ namespace MyApp_backend.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("16d44ea3-e39e-4539-9e36-928f06ce3afc"),
+                            Id = new Guid("f1f119a1-0136-469a-8b70-a4f43f5cba9e"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "25286657-2453-4b06-88c8-59558f68096e",
-                            CreatedAt = new DateTime(2025, 10, 29, 9, 34, 51, 908, DateTimeKind.Utc).AddTicks(2909),
+                            ConcurrencyStamp = "5758b99d-43fa-4e83-9af8-fa7047973916",
+                            CreatedAt = new DateTime(2025, 10, 29, 10, 24, 25, 633, DateTimeKind.Utc).AddTicks(9812),
                             Email = "provider@example.com",
                             EmailConfirmed = true,
                             IsActive = true,
@@ -271,13 +271,74 @@ namespace MyApp_backend.Infrastructure.Migrations
                             IsVerified = true,
                             LockoutEnabled = false,
                             Name = "John Doe",
-                            PasswordHash = "AQAAAAIAAYagAAAAEP3aXPNYXcOzYrrB5cCK85AHcTKLcWfolgXzOo5wMw5UoklUSJ4inqZpqjW3BARVYg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEHK22xwfGJbnuVVV4AWLJPePSf0kwTPuEWr4RYIK3KiG0UPixgmKhKJA6nf8WLYSXA==",
                             PhoneNumber = "+1234567890",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "170ceb42-0ab7-438f-a5ce-9abf91bd2265",
+                            SecurityStamp = "53482d19-adc5-49b3-8e6c-d1d4c6d5b78f",
                             TwoFactorEnabled = false,
                             UserName = "provider@example.com"
                         });
+                });
+
+            modelBuilder.Entity("MyApp_backend.Domain.Entities.Booking", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("ActualCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("EstimatedCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastLogout")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LastUpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastUpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ProviderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ServiceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("TimeSlotEnd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("TimeSlotStart")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Bookings");
                 });
 
             modelBuilder.Entity("MyApp_backend.Domain.Entities.Catalog.Service", b =>
@@ -464,14 +525,14 @@ namespace MyApp_backend.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("16d44ea3-e39e-4539-9e36-928f06ce3afc"),
+                            UserId = new Guid("f1f119a1-0136-469a-8b70-a4f43f5cba9e"),
                             AvailabilityJson = "{\"monday\": [\"9-5\"]}",
                             BusinessDescription = "We provide cleaning and handyman services.",
                             BusinessName = "John's Home Services",
                             CertificateUrlsJson = "[]",
-                            CreatedAt = new DateTime(2025, 10, 29, 9, 34, 51, 987, DateTimeKind.Utc).AddTicks(5106),
+                            CreatedAt = new DateTime(2025, 10, 29, 10, 24, 25, 669, DateTimeKind.Utc).AddTicks(8551),
                             DocumentUrlsJson = "[]",
-                            Id = new Guid("a904500d-b0ee-407d-8f73-bd080201b489"),
+                            Id = new Guid("0110b87c-07e6-44c7-8403-3e29a0e781ab"),
                             IsActive = true,
                             IsApproved = true,
                             IsDeleted = false,
