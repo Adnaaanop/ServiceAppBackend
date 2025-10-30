@@ -4,6 +4,7 @@ using MyApp_backend.Domain.Interfaces;
 using MyApp_backend.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace MyApp_backend.Infrastructure.Repositories
@@ -96,5 +97,11 @@ namespace MyApp_backend.Infrastructure.Repositories
             await _context.SaveChangesAsync();
             return entity;
         }
+
+        public async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate)
+        {
+            return await _dbSet.AsNoTracking().Where(predicate).ToListAsync();
+        }
+
     }
 }

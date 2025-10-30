@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MyApp_backend.Application.DTOs.Booking;
 using MyApp_backend.Application.DTOs.Catalog;
+using MyApp_backend.Application.DTOs.Payment;
 using MyApp_backend.Application.DTOs.User;
 using MyApp_backend.Application.Helpers;
 using MyApp_backend.Application.Interfaces;
@@ -12,6 +13,7 @@ using MyApp_backend.Application.Mapping;
 using MyApp_backend.Application.Services;
 using MyApp_backend.Domain.Entities;
 using MyApp_backend.Domain.Entities.Catalog;
+using MyApp_backend.Domain.Entities.Payment;
 using MyApp_backend.Domain.Interfaces;
 using MyApp_backend.Infrastructure.Data;
 
@@ -73,14 +75,19 @@ builder.Services.AddScoped<IGenericService<UserRequestDto, UserUpdateDto, UserRe
 builder.Services.AddScoped<IGenericService<ServiceCategoryCreateDto, ServiceCategoryUpdateDto, ServiceCategoryResponseDto, ServiceCategory>, ServiceCategoryService>();
 builder.Services.AddScoped<IGenericService<ServiceCreateDto, ServiceUpdateDto, ServiceResponseDto, Service>, ServiceService>();
 builder.Services.AddScoped<IGenericService<BookingCreateDto, BookingUpdateDto, BookingResponseDto, Booking>, BookingService>();
-
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IGenericService<PricingRuleCreateDto, PricingRuleUpdateDto, PricingRuleResponseDto, PricingRule>, PricingRuleService>();
 
 //Automapper
 builder.Services.AddAutoMapper(
     typeof(UserProfile),
     typeof(ProviderProfileMapping),
     typeof(CatalogProfile),
-    typeof(BookingProfile)
+    typeof(BookingProfile),
+    typeof(ReviewProfile),
+    typeof(PaymentProfile),
+    typeof(PricingRuleProfile)
  );
     
 

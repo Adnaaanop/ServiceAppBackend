@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MyApp_backend.Domain.Entities;
 using MyApp_backend.Domain.Entities.Catalog;
+using MyApp_backend.Domain.Entities.Payment;
 using System;
 using System.Reflection.Emit;
 
@@ -15,6 +16,12 @@ namespace MyApp_backend.Infrastructure.Data
         public DbSet<ServiceCategory> ServiceCategories { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<Booking> Bookings { get; set; }
+
+        //Payment
+        public DbSet<PricingRule> PricingRules { get; set; }
+        public DbSet<Review> Reviews { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+
 
 
 

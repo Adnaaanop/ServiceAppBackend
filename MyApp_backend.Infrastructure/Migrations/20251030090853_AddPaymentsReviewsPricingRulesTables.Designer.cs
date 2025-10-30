@@ -12,8 +12,8 @@ using MyApp_backend.Infrastructure.Data;
 namespace MyApp_backend.Infrastructure.Migrations
 {
     [DbContext(typeof(MyAppDbContext))]
-    [Migration("20251030052232_AddPayment_Module")]
-    partial class AddPayment_Module
+    [Migration("20251030090853_AddPaymentsReviewsPricingRulesTables")]
+    partial class AddPaymentsReviewsPricingRulesTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -263,10 +263,10 @@ namespace MyApp_backend.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("47a2fccb-3e77-4ada-9c5b-dcb627840abe"),
+                            Id = new Guid("974ebc2f-e2a9-4335-b2f0-a12c5dbbd88b"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "19e9d6ab-7d11-4dd4-b7ef-85a2bbaa9540",
-                            CreatedAt = new DateTime(2025, 10, 30, 5, 22, 32, 437, DateTimeKind.Utc).AddTicks(1911),
+                            ConcurrencyStamp = "9d156635-9513-495d-8b05-758bda3fad80",
+                            CreatedAt = new DateTime(2025, 10, 30, 9, 8, 52, 758, DateTimeKind.Utc).AddTicks(5025),
                             Email = "provider@example.com",
                             EmailConfirmed = true,
                             IsActive = true,
@@ -274,10 +274,10 @@ namespace MyApp_backend.Infrastructure.Migrations
                             IsVerified = true,
                             LockoutEnabled = false,
                             Name = "John Doe",
-                            PasswordHash = "AQAAAAIAAYagAAAAEH991Ceo6BjoEMFpTvSMt04A0CbqQXgyBBvn9OemSvwQQXirhstLwf0bDXNMB+Sk+w==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEHy8bPNuz+J7Wptbsw0hIgNCj6gACyYenVUisJikpt9OfIHf5fhEAXph3zMHsCWVZA==",
                             PhoneNumber = "+1234567890",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "67ec4139-36f2-43d6-98d4-c2dfb694824d",
+                            SecurityStamp = "81fdfca6-6330-4e68-bedf-188df8ae8b2d",
                             TwoFactorEnabled = false,
                             UserName = "provider@example.com"
                         });
@@ -459,6 +459,151 @@ namespace MyApp_backend.Infrastructure.Migrations
                     b.ToTable("ServiceCategories");
                 });
 
+            modelBuilder.Entity("MyApp_backend.Domain.Entities.Payment.Payment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("BookingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("InvoiceUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastLogout")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LastUpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastUpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PaymentMethod")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TransactionId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Payments");
+                });
+
+            modelBuilder.Entity("MyApp_backend.Domain.Entities.Payment.PricingRule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("BasePrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("CommissionRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastLogout")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LastUpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastUpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ProviderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ServiceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PricingRules");
+                });
+
+            modelBuilder.Entity("MyApp_backend.Domain.Entities.Payment.Review", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BookingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastLogout")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LastUpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastUpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProviderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Reviews");
+                });
+
             modelBuilder.Entity("MyApp_backend.Domain.Entities.ProviderProfile", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -528,14 +673,14 @@ namespace MyApp_backend.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("47a2fccb-3e77-4ada-9c5b-dcb627840abe"),
+                            UserId = new Guid("974ebc2f-e2a9-4335-b2f0-a12c5dbbd88b"),
                             AvailabilityJson = "{\"monday\": [\"9-5\"]}",
                             BusinessDescription = "We provide cleaning and handyman services.",
                             BusinessName = "John's Home Services",
                             CertificateUrlsJson = "[]",
-                            CreatedAt = new DateTime(2025, 10, 30, 5, 22, 32, 473, DateTimeKind.Utc).AddTicks(903),
+                            CreatedAt = new DateTime(2025, 10, 30, 9, 8, 52, 794, DateTimeKind.Utc).AddTicks(9843),
                             DocumentUrlsJson = "[]",
-                            Id = new Guid("99e0157d-94e3-4627-b1f6-ab9cf954ed6b"),
+                            Id = new Guid("047387df-b791-4144-b537-4e013661b985"),
                             IsActive = true,
                             IsApproved = true,
                             IsDeleted = false,

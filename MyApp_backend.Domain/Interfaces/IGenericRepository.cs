@@ -1,6 +1,7 @@
 ﻿using MyApp_backend.Domain.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace MyApp_backend.Domain.Interfaces
@@ -12,5 +13,7 @@ namespace MyApp_backend.Domain.Interfaces
         Task<IEnumerable<TEntity>> GetAllAsync();
         Task<TEntity> UpdateAsync(TEntity entity);
         Task<bool> DeleteAsync(Guid id);
+
+        Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate);
     }
 }
