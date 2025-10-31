@@ -68,11 +68,10 @@ namespace MyApp_backend.API.Controllers
 
         // Create Razorpay order
         [HttpPost("create-order")]
-        public async Task<ActionResult<string>> CreateOrder([FromBody] PaymentCreateDto dto)
+        public async Task<ActionResult<string>> CreateOrder([FromBody] PaymentOrderCreateRequestDto dto)
         {
             if (dto == null || dto.Amount <= 0 || dto.BookingId == Guid.Empty)
                 return BadRequest("Invalid input");
-
             try
             {
                 var orderId = await _paymentService.CreateRazorpayOrderAsync(dto.Amount, dto.BookingId);
@@ -80,7 +79,6 @@ namespace MyApp_backend.API.Controllers
             }
             catch (Exception ex)
             {
-                // Log exception here
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error creating Razorpay order: " + ex.Message);
             }
         }
