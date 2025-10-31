@@ -76,8 +76,13 @@ builder.Services.AddScoped<IGenericService<ServiceCategoryCreateDto, ServiceCate
 builder.Services.AddScoped<IGenericService<ServiceCreateDto, ServiceUpdateDto, ServiceResponseDto, Service>, ServiceService>();
 builder.Services.AddScoped<IGenericService<BookingCreateDto, BookingUpdateDto, BookingResponseDto, Booking>, BookingService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IPaymentService, RazorpayPaymentService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IGenericService<PricingRuleCreateDto, PricingRuleUpdateDto, PricingRuleResponseDto, PricingRule>, PricingRuleService>();
+
+// Add this in your Program.cs before building the app
+builder.Services.Configure<MyApp_backend.Application.Settings.RazorpaySettings>(builder.Configuration.GetSection("Razorpay"));
+
 
 //Automapper
 builder.Services.AddAutoMapper(

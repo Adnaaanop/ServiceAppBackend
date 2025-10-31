@@ -13,9 +13,19 @@ namespace MyApp_backend.Application.Mapping
     {
         public PaymentProfile()
         {
-            CreateMap<Payment, PaymentResponseDto>();
-            CreateMap<PaymentCreateDto, Payment>();
-            CreateMap<PaymentUpdateDto, Payment>();
+            CreateMap<Payment, PaymentResponseDto>()
+                .ForMember(dest => dest.RazorpayOrderId, opt => opt.MapFrom(src => src.RazorpayOrderId))
+                .ForMember(dest => dest.RazorpayPaymentId, opt => opt.MapFrom(src => src.RazorpayPaymentId))
+                .ForMember(dest => dest.RazorpaySignature, opt => opt.MapFrom(src => src.RazorpaySignature));
+
+            CreateMap<PaymentCreateDto, Payment>()
+                .ForMember(dest => dest.RazorpayOrderId, opt => opt.MapFrom(src => src.RazorpayOrderId))
+                .ForMember(dest => dest.RazorpayPaymentId, opt => opt.MapFrom(src => src.RazorpayPaymentId))
+                .ForMember(dest => dest.RazorpaySignature, opt => opt.MapFrom(src => src.RazorpaySignature));
+
+            CreateMap<PaymentUpdateDto, Payment>()
+                .ForMember(dest => dest.RazorpayPaymentId, opt => opt.MapFrom(src => src.RazorpayPaymentId))
+                .ForMember(dest => dest.RazorpaySignature, opt => opt.MapFrom(src => src.RazorpaySignature));
         }
     }
 }

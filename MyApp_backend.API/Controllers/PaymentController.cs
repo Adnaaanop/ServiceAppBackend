@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MyApp_backend.Application.DTOs.Payment;
 using MyApp_backend.Application.Interfaces;
+using Razorpay.Api;
 
 namespace MyApp_backend.API.Controllers
 {
@@ -60,5 +61,69 @@ namespace MyApp_backend.API.Controllers
             if (!result) return NotFound();
             return NoContent();
         }
+
+
+
+
+
+        // Create Razorpay order
+        [HttpPost("create-order")]
+        public async Task<ActionResult<string>> CreateOrder([FromBody] PaymentCreateDto dto)
+        {
+            if (dto == null || dto.Amount <= 0 || dto.BookingId == Guid.Empty)
+                return BadRequest("Invalid input");
+
+            try
+            {
+                var orderId = await _paymentService.CreateRazorpayOrderAsync(dto.Amount, dto.BookingId);
+                return Ok(new { RazorpayOrderId = orderId });
+            }
+            catch (Exception ex)
+            {
+                // Log exception here
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error creating Razorpay order: " + ex.Message);
+            }
+        }
+
+        [HttpPost("verify-payment")]
+        public async Task<IActionResult> VerifyPayment([FromBody] PaymentVerificationDto dto)
+        {
+            if (dto == null || string.IsNullOrEmpty(dto.RazorpayOrderId)
+                || string.IsNullOrEmpty(dto.RazorpayPaymentId)
+                || string.IsNullOrEmpty(dto.RazorpaySignature))
+                return BadRequest("Invalid data");
+
+            try
+            {
+                var isValid = _paymentService.VerifyPaymentSignature(dto.RazorpayOrderId, dto.RazorpayPaymentId, dto.RazorpaySignature);
+                if (!isValid)
+                    return BadRequest("Invalid payment signature");
+
+                // Update payment status to captured/successful
+                var payments = await _paymentService.GetByBookingIdAsync(Guid.Parse(dto.RazorpayOrderId));
+                var paymentToUpdate = payments.FirstOrDefault();
+
+                if (paymentToUpdate != null)
+                {
+                    var updateDto = new PaymentUpdateDto
+                    {
+                        Status = "Paid",
+                        TransactionId = dto.RazorpayPaymentId
+                        // Add other fields if needed
+                    };
+                    await _paymentService.UpdateAsync(paymentToUpdate.Id, updateDto);
+                }
+
+                return Ok(new { Message = "Payment verified successfully" });
+            }
+            catch (Exception ex)
+            {
+                // Log exception here
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error verifying payment: " + ex.Message);
+            }
+        }
+
+
+
     }
 }

@@ -14,6 +14,11 @@ namespace MyApp_backend.Application.DTOs.Payment
         public string? TransactionId { get; set; }
         public string? InvoiceUrl { get; set; }
         public string? PaymentMethod { get; set; }
+
+        // Razorpay specific
+        public string? RazorpayOrderId { get; set; }
+        public string? RazorpayPaymentId { get; set; }
+        public string? RazorpaySignature { get; set; }
     }
 
     public class PaymentUpdateDto
@@ -21,6 +26,9 @@ namespace MyApp_backend.Application.DTOs.Payment
         public string Status { get; set; } = null!;
         public string? TransactionId { get; set; }
         public string? InvoiceUrl { get; set; }
+
+        public string? RazorpayPaymentId { get; set; }
+        public string? RazorpaySignature { get; set; }
     }
 
     public class PaymentResponseDto
@@ -34,5 +42,10 @@ namespace MyApp_backend.Application.DTOs.Payment
         public string? PaymentMethod { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? LastUpdatedAt { get; set; }
+
+        // Razorpay specific
+        public string? RazorpayOrderId { get; set; }
+        public string? RazorpayPaymentId { get; set; }
+        public string? RazorpaySignature { get; set; }
     }
 }

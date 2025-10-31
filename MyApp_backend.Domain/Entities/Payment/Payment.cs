@@ -14,5 +14,10 @@ namespace MyApp_backend.Domain.Entities.Payment
         public string? TransactionId { get; set; }
         public string? InvoiceUrl { get; set; }
         public string? PaymentMethod { get; set; }
+
+        // Razorpay specific fields
+        public string? RazorpayOrderId { get; set; }
+        public string? RazorpayPaymentId { get; set; }
+        public string? RazorpaySignature { get; set; }
     }
 }

@@ -61,5 +61,14 @@ namespace MyApp_backend.Application.Services
             await _repository.UpdateAsync(entity);
             return _mapper.Map<PaymentResponseDto>(entity);
         }
+        public Task<string> CreateRazorpayOrderAsync(decimal amount, Guid bookingId)
+        {
+            throw new NotImplementedException("Razorpay order creation is not supported in standard PaymentService.");
+        }
+
+        public bool VerifyPaymentSignature(string orderId, string paymentId, string signature)
+        {
+            throw new NotImplementedException("Razorpay signature verification is not supported in standard PaymentService.");
+        }
     }
 }
