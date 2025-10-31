@@ -114,5 +114,11 @@ namespace MyApp_backend.Application.Services
             await _repository.UpdateAsync(entity);
             return _mapper.Map<PaymentResponseDto>(entity);
         }
+        public async Task<PaymentResponseDto?> GetByRazorpayOrderIdAsync(string razorpayOrderId)
+        {
+            var payments = await _repository.FindAsync(x => x.TransactionId == razorpayOrderId && !x.IsDeleted);
+            var entity = payments.FirstOrDefault();
+            return entity == null ? null : _mapper.Map<PaymentResponseDto>(entity);
+        }
     }
 }

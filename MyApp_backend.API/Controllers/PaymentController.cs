@@ -98,8 +98,8 @@ namespace MyApp_backend.API.Controllers
                     return BadRequest("Invalid payment signature");
 
                 // Update payment status to captured/successful
-                var payments = await _paymentService.GetByBookingIdAsync(Guid.Parse(dto.RazorpayOrderId));
-                var paymentToUpdate = payments.FirstOrDefault();
+                var paymentToUpdate = await _paymentService.GetByRazorpayOrderIdAsync(dto.RazorpayOrderId);
+
 
                 if (paymentToUpdate != null)
                 {

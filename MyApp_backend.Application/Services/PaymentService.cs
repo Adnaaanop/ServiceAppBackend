@@ -70,5 +70,11 @@ namespace MyApp_backend.Application.Services
         {
             throw new NotImplementedException("Razorpay signature verification is not supported in standard PaymentService.");
         }
+        public async Task<PaymentResponseDto?> GetByRazorpayOrderIdAsync(string razorpayOrderId)
+        {
+            var payments = await _repository.FindAsync(x => x.RazorpayOrderId == razorpayOrderId && !x.IsDeleted);
+            var entity = payments.FirstOrDefault();
+            return entity == null ? null : _mapper.Map<PaymentResponseDto>(entity);
+        }
     }
 }

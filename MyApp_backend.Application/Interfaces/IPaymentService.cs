@@ -14,5 +14,7 @@ namespace MyApp_backend.Application.Interfaces
 
         Task<string> CreateRazorpayOrderAsync(decimal amount, Guid bookingId);
         bool VerifyPaymentSignature(string orderId, string paymentId, string signature);
+
+        Task<PaymentResponseDto?> GetByRazorpayOrderIdAsync(string razorpayOrderId);
     }
 }
