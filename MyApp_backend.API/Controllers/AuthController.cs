@@ -16,15 +16,15 @@ namespace MyApp_backend.API.Controllers
             _authService = authService;
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
-        {
-            var result = await _authService.RegisterAsync(registerDto);
-            if (!result.IsSuccess)
-                return BadRequest(result);
+        //[HttpPost("register")]
+        //public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
+        //{
+        //    var result = await _authService.RegisterAsync(registerDto);
+        //    if (!result.IsSuccess)
+        //        return BadRequest(result);
 
-            return Ok(result);
-        }
+        //    return Ok(result);
+        //}
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)

@@ -21,5 +21,9 @@ namespace MyApp_backend.Domain.Entities
 
         public decimal? EstimatedCost { get; set; }
         public decimal? ActualCost { get; set; }
+
+        // Add this navigation property:
+        public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
     }
 }
+

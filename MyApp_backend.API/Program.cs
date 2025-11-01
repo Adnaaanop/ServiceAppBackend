@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MyApp_backend.Application.DTOs.Booking;
 using MyApp_backend.Application.DTOs.Catalog;
+using MyApp_backend.Application.DTOs.Message;
 using MyApp_backend.Application.DTOs.Payment;
 using MyApp_backend.Application.DTOs.User;
 using MyApp_backend.Application.Helpers;
@@ -69,6 +70,12 @@ builder.Services.AddScoped<JwtTokenHelper>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IProviderRepository, ProviderRepository>();
 
+
+// Add this to your DI section with other services
+builder.Services.AddScoped<IGenericRepository<Message>, GenericRepository<Message>>(); // For Message entity
+builder.Services.AddScoped<IGenericService<MessageCreateDto, object, MessageResponseDto, Message>, MessageService>();
+
+
 //Services
 builder.Services.AddScoped<IProviderService, ProviderService>();
 builder.Services.AddScoped<IGenericService<UserRequestDto, UserUpdateDto, UserResponseDto, ApplicationUser>, UserService>();
@@ -92,7 +99,8 @@ builder.Services.AddAutoMapper(
     typeof(BookingProfile),
     typeof(ReviewProfile),
     typeof(PaymentProfile),
-    typeof(PricingRuleProfile)
+    typeof(PricingRuleProfile),
+    typeof(MessageProfile)
  );
     
 

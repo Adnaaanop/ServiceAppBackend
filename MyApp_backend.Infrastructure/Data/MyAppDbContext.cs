@@ -23,6 +23,11 @@ namespace MyApp_backend.Infrastructure.Data
         public DbSet<Payment> Payments { get; set; }
 
 
+        //Messaging
+
+        public DbSet<Message> Messages { get; set; }
+
+
 
 
 
@@ -81,6 +86,24 @@ namespace MyApp_backend.Infrastructure.Data
                 .IsRequired();
 
 
+            //Messages
+
+            builder.Entity<Message>()
+                .HasOne(m => m.Booking)
+                .WithMany(b => b.Messages)
+                .HasForeignKey(m => m.BookingId);
+
+            builder.Entity<Message>()
+                .HasOne(m => m.Sender)
+                .WithMany()
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Message>()
+                .HasOne(m => m.Receiver)
+                .WithMany()
+                .HasForeignKey(m => m.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
 
 
 
