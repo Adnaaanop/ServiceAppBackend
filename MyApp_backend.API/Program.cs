@@ -87,7 +87,7 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IPaymentService, RazorpayPaymentService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IGenericService<PricingRuleCreateDto, PricingRuleUpdateDto, PricingRuleResponseDto, PricingRule>, PricingRuleService>();
-
+builder.Services.AddScoped<IEmailService, EmailService>();
 // Add this in your Program.cs before building the app
 builder.Services.Configure<MyApp_backend.Application.Settings.RazorpaySettings>(builder.Configuration.GetSection("Razorpay"));
 

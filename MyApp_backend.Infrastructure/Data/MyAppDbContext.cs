@@ -28,6 +28,9 @@ namespace MyApp_backend.Infrastructure.Data
         public DbSet<Message> Messages { get; set; }
 
 
+        public DbSet<UserOtp> UserOtps { get; set; }
+
+
 
 
 
@@ -106,6 +109,14 @@ namespace MyApp_backend.Infrastructure.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
 
+
+            //UserOtp
+
+
+            builder.Entity<ApplicationUser>()
+                .HasOne(u => u.UserOtp)
+                .WithOne(o => o.User)
+                .HasForeignKey<UserOtp>(o => o.UserId);
 
 
 

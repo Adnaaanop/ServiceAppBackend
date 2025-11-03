@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using MyApp_backend.Application.DTOs.Authentication;
@@ -7,6 +8,8 @@ using MyApp_backend.Application.Interfaces;
 using MyApp_backend.Application.Models;
 using MyApp_backend.Domain.Entities;
 using MyApp_backend.Domain.Interfaces;
+using MyApp_backend.Infrastructure.Data;
+using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -22,17 +25,23 @@ namespace MyApp_backend.Infrastructure.Services
         private readonly JwtTokenHelper _jwtTokenHelper;
         private readonly IConfiguration _configuration;
         private readonly IProviderRepository _providerRepository;
+        private readonly IEmailService _emailService;
+        private readonly MyAppDbContext _context;
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
             JwtTokenHelper jwtTokenHelper,
             IConfiguration configuration,
-            IProviderRepository providerRepository)
+            IProviderRepository providerRepository,
+            IEmailService emailService,
+            MyAppDbContext context)
         {
             _userManager = userManager;
             _jwtTokenHelper = jwtTokenHelper;
             _configuration = configuration;
             _providerRepository = providerRepository;
+            _emailService = emailService;
+            _context = context;
         }
 
         public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
@@ -60,7 +69,7 @@ namespace MyApp_backend.Infrastructure.Services
             var refreshToken = _jwtTokenHelper.GenerateRefreshToken();
 
             user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7); // e.g., 7 days expiry
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
             await _userManager.UpdateAsync(user);
 
             return new AuthResponseDto { IsSuccess = true, Token = token, RefreshToken = refreshToken };
@@ -68,78 +77,39 @@ namespace MyApp_backend.Infrastructure.Services
 
         public async Task<AuthResponseDto> LoginAsync(LoginDto dto)
         {
-            Console.WriteLine("==== PROVIDER LOGIN START ====");
-            Console.WriteLine($"Received login attempt. Email: {dto.Email}");
-
             var user = await _userManager.FindByEmailAsync(dto.Email);
-            Console.WriteLine(user == null
-                ? $"User not found in DB for email: {dto.Email}"
-                : $"Fetched user: {user.Email}, Id: {user.Id}");
-
             if (user == null)
-            {
-                Console.WriteLine("Login Failed: User not found.");
                 return new AuthResponseDto { IsSuccess = false, Errors = new List<string> { "Invalid login attempt." } };
-            }
 
             var passwordValid = await _userManager.CheckPasswordAsync(user, dto.Password);
-            Console.WriteLine($"Password validity for {user.Email}: {passwordValid}");
-
             if (!passwordValid)
-            {
-                Console.WriteLine("Login Failed: Incorrect password.");
                 return new AuthResponseDto { IsSuccess = false, Errors = new List<string> { "Invalid login attempt." } };
-            }
 
             var roles = await _userManager.GetRolesAsync(user);
-            Console.WriteLine($"User roles for {user.Email}: {string.Join(", ", roles)}");
-
             if (roles.Contains("Provider"))
             {
-                Console.WriteLine($"Fetching provider profile for user Id: {user.Id}...");
-
                 var profile = await _providerRepository.GetByUserIdAsync(user.Id);
-
-                Console.WriteLine(profile == null
-                    ? $"Provider profile NOT FOUND for UserId: {user.Id}"
-                    : $"Provider profile fetched for UserId: {user.Id} | IsApproved={profile.IsApproved}");
-
                 if (profile == null)
-                {
                     return new AuthResponseDto
                     {
                         IsSuccess = false,
                         Errors = new List<string> { "Provider profile not found. Please contact support." }
                     };
-                }
-
                 if (!profile.IsApproved)
-                {
-                    Console.WriteLine("Provider account exists but is NOT approved by admin.");
                     return new AuthResponseDto
                     {
                         IsSuccess = false,
                         Errors = new List<string> { "Your provider account is not yet approved by admin." }
                     };
-                }
             }
 
             var userModel = await MapToUserModel(user);
-            Console.WriteLine("Mapped ApplicationUser to UserModel.");
-
             var token = _jwtTokenHelper.GenerateJwtToken(userModel);
-            Console.WriteLine("JWT Token generated.");
-
             var refreshToken = _jwtTokenHelper.GenerateRefreshToken();
-            Console.WriteLine("Refresh token generated.");
 
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-
             await _userManager.UpdateAsync(user);
-            Console.WriteLine("User refresh token and expiry updated in DB.");
-
-            Console.WriteLine($"User {user.Email} logged in successfully.");
 
             return new AuthResponseDto { IsSuccess = true, Token = token, RefreshToken = refreshToken };
         }
@@ -161,7 +131,8 @@ namespace MyApp_backend.Infrastructure.Services
         public async Task<AuthResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request)
         {
             var principal = GetPrincipalFromExpiredToken(request.Token);
-            if (principal == null) return new AuthResponseDto { IsSuccess = false, Errors = new List<string> { "Invalid token" } };
+            if (principal == null)
+                return new AuthResponseDto { IsSuccess = false, Errors = new List<string> { "Invalid token" } };
 
             var userId = Guid.Parse(principal.FindFirstValue(JwtRegisteredClaimNames.Sub));
             var user = await _userManager.FindByIdAsync(userId.ToString());
@@ -192,7 +163,7 @@ namespace MyApp_backend.Infrastructure.Services
                 ValidAudience = _configuration["Jwt:Audience"],
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])),
-                ValidateLifetime = false // We check expired tokens here, so ignore lifetime validation
+                ValidateLifetime = false
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -208,5 +179,58 @@ namespace MyApp_backend.Infrastructure.Services
             return null!;
         }
 
+        public async Task<Result> SendOtpAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return new Result { IsSuccess = false, Errors = new List<string> { "User not found." } };
+
+            // Generate OTP
+            var otp = new Random().Next(100000, 999999).ToString();
+
+            var userOtp = await _context.UserOtps.FirstOrDefaultAsync(x => x.UserId == user.Id);
+            if (userOtp == null)
+            {
+                userOtp = new UserOtp { UserId = user.Id };
+                _context.UserOtps.Add(userOtp);
+            }
+
+            userOtp.OtpCode = otp;
+            userOtp.OtpExpiry = DateTime.UtcNow.AddMinutes(10);
+            await _context.SaveChangesAsync();
+
+            var subject = "Your OTP Code";
+            var body = $"Your OTP code is {otp}. It will expire in 10 minutes.";
+            await _emailService.SendEmailAsync(user.Email, subject, body);
+
+            return new Result { IsSuccess = true, Message = "OTP sent successfully." };
+        }
+
+        public async Task<Result> ResetPasswordWithOtpAsync(string email, string otp, string newPassword, string confirmPassword)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return new Result { IsSuccess = false, Errors = new List<string> { "User not found." } };
+
+            var userOtp = await _context.UserOtps.FirstOrDefaultAsync(x => x.UserId == user.Id);
+
+            if (userOtp == null || userOtp.OtpCode != otp || DateTime.UtcNow > userOtp.OtpExpiry)
+                return new Result { IsSuccess = false, Errors = new List<string> { "OTP is invalid or expired." } };
+
+            if (newPassword != confirmPassword)
+                return new Result { IsSuccess = false, Errors = new List<string> { "Passwords do not match." } };
+
+            var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, resetToken, newPassword);
+
+            if (!result.Succeeded)
+                return new Result { IsSuccess = false, Errors = result.Errors.Select(e => e.Description).ToList() };
+
+            // Remove used OTP entry
+            _context.UserOtps.Remove(userOtp);
+            await _context.SaveChangesAsync();
+
+            return new Result { IsSuccess = true, Message = "Password reset successfully." };
+        }
     }
 }

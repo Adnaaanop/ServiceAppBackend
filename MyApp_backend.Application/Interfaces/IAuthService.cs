@@ -14,5 +14,9 @@ namespace MyApp_backend.Application.Interfaces
         Task<AuthResponseDto> LoginAsync(LoginDto loginDto);
         Task<AuthResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request);
         string GenerateToken(UserModel user);
+
+        Task<Result> SendOtpAsync(string email);
+        Task<Result> ResetPasswordWithOtpAsync(string email, string otp, string newPassword, string confirmPassword);
+
     }
 }

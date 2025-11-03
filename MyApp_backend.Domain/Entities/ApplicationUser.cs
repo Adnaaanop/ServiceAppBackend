@@ -30,5 +30,6 @@ namespace MyApp_backend.Domain.Entities
 
 
         public virtual ProviderProfile? ProviderProfile { get; set; }
+        public virtual UserOtp UserOtp { get; set; }
     }
 }

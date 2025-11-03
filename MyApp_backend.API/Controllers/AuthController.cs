@@ -45,5 +45,24 @@ namespace MyApp_backend.API.Controllers
             return Ok(response);
         }
 
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto request)
+        {
+            var result = await _authService.SendOtpAsync(request.Email);
+            if (!result.IsSuccess) return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] VerifyOtpRequestDto request)
+        {
+            var result = await _authService.ResetPasswordWithOtpAsync(request.Email, request.Otp, request.NewPassword, request.ConfirmPassword);
+            if (!result.IsSuccess) return BadRequest(result);
+
+            return Ok(result);
+        }
+
     }
 }
