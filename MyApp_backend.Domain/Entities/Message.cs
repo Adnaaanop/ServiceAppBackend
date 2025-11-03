@@ -18,7 +18,7 @@ namespace MyApp_backend.Domain.Entities
         public ApplicationUser Receiver { get; set; }
 
         public string MessageText { get; set; }
-        public string MediaUrl { get; set; }
+        public string? MediaUrl { get; set; }
 
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     }
