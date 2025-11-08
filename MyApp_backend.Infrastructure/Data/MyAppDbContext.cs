@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using MyApp_backend.Domain.Entities;
 using MyApp_backend.Domain.Entities.Catalog;
 using MyApp_backend.Domain.Entities.Payment;
+using MyApp_backend.Domain.Entities.WarrantySafety;
 using System;
 using System.Reflection.Emit;
 
@@ -30,6 +31,11 @@ namespace MyApp_backend.Infrastructure.Data
 
         public DbSet<UserOtp> UserOtps { get; set; }
 
+
+
+        public DbSet<WarrantyRequest> WarrantyRequests { get; set; }
+        public DbSet<EmergencyAlert> EmergencyAlerts { get; set; }
+        public DbSet<SafetyTip> SafetyTips { get; set; }
 
 
 
@@ -117,6 +123,32 @@ namespace MyApp_backend.Infrastructure.Data
                 .HasOne(u => u.UserOtp)
                 .WithOne(o => o.User)
                 .HasForeignKey<UserOtp>(o => o.UserId);
+
+
+            //Warranty Module;
+
+                    builder.Entity<WarrantyRequest>(entity =>
+                    {
+                        entity.HasKey(e => e.Id);
+                        entity.Property(e => e.ProductName).IsRequired().HasMaxLength(200);
+                        entity.Property(e => e.Description).HasMaxLength(1000);
+                        entity.Property(e => e.Status).IsRequired();
+                    });
+
+                     
+                    builder.Entity<EmergencyAlert>(entity =>
+                    {
+                        entity.HasKey(e => e.Id);
+                        entity.Property(e => e.Description).HasMaxLength(500);
+                    });
+
+                    
+                    builder.Entity<SafetyTip>(entity =>
+                    {
+                        entity.HasKey(e => e.Id);
+                        entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
+                        entity.Property(e => e.Content).IsRequired();
+                    });
 
 
 

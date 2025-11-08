@@ -70,12 +70,12 @@ builder.Services.AddScoped<JwtTokenHelper>();
 //Repository
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IProviderRepository, ProviderRepository>();
-
+builder.Services.AddScoped<IWarrantyRequestRepository, WarrantyRequestRepository>();
+builder.Services.AddScoped<IEmergencyAlertRepository, EmergencyAlertRepository>();
 
 // Add this to your DI section with other services
 builder.Services.AddScoped<IGenericRepository<Message>, GenericRepository<Message>>(); // For Message entity
 builder.Services.AddScoped<IGenericService<MessageCreateDto, object, MessageResponseDto, Message>, MessageService>();
-
 
 //Services
 builder.Services.AddScoped<IProviderService, ProviderService>();
@@ -88,6 +88,9 @@ builder.Services.AddScoped<IPaymentService, RazorpayPaymentService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IGenericService<PricingRuleCreateDto, PricingRuleUpdateDto, PricingRuleResponseDto, PricingRule>, PricingRuleService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IWarrantyRequestService, WarrantyRequestService>();
+builder.Services.AddScoped<IEmergencyAlertService, EmergencyAlertService>();
+
 // Add this in your Program.cs before building the app
 builder.Services.Configure<MyApp_backend.Application.Settings.RazorpaySettings>(builder.Configuration.GetSection("Razorpay"));
 
@@ -101,11 +104,12 @@ builder.Services.AddAutoMapper(
     typeof(ReviewProfile),
     typeof(PaymentProfile),
     typeof(PricingRuleProfile),
-    typeof(MessageProfile)
+    typeof(MessageProfile),
+    typeof(WarrantySafetyProfile)
  );
-    
 
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 // Swagger configuration: Enable JWT "Authorize" button and lock icons
 builder.Services.AddSwaggerGen(c =>
 {
@@ -145,7 +149,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactDev",
+    options.AddPolicy("MyAllowSpecificOrigins",
         b => b.WithOrigins("http://localhost:5173")
               .AllowAnyHeader()
               .AllowAnyMethod()
@@ -166,7 +170,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowReactDev");
+app.UseCors("MyAllowSpecificOrigins");
 app.UseAuthentication();
 
 
@@ -177,6 +181,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapHub<ChatHub>("/chathub");
+app.MapHub<EmergencyAlertHub>("/emergencyAlertHub");
 
 using (var scope = app.Services.CreateScope())
 {
