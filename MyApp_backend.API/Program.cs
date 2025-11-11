@@ -72,6 +72,7 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddScoped<IProviderRepository, ProviderRepository>();
 builder.Services.AddScoped<IWarrantyRequestRepository, WarrantyRequestRepository>();
 builder.Services.AddScoped<IEmergencyAlertRepository, EmergencyAlertRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
 // Add this to your DI section with other services
 builder.Services.AddScoped<IGenericRepository<Message>, GenericRepository<Message>>(); // For Message entity
@@ -90,6 +91,8 @@ builder.Services.AddScoped<IGenericService<PricingRuleCreateDto, PricingRuleUpda
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IWarrantyRequestService, WarrantyRequestService>();
 builder.Services.AddScoped<IEmergencyAlertService, EmergencyAlertService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
 
 // Add this in your Program.cs before building the app
 builder.Services.Configure<MyApp_backend.Application.Settings.RazorpaySettings>(builder.Configuration.GetSection("Razorpay"));
@@ -105,7 +108,8 @@ builder.Services.AddAutoMapper(
     typeof(PaymentProfile),
     typeof(PricingRuleProfile),
     typeof(MessageProfile),
-    typeof(WarrantySafetyProfile)
+    typeof(WarrantySafetyProfile),
+    typeof(NotificationProfile)
  );
 
 
@@ -180,8 +184,11 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+//SignalR
+
 app.MapHub<ChatHub>("/chathub");
 app.MapHub<EmergencyAlertHub>("/emergencyAlertHub");
+app.MapHub<NotificationsHub>("/notificationsHub");
 
 using (var scope = app.Services.CreateScope())
 {

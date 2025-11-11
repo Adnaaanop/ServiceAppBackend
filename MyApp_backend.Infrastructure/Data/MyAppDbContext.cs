@@ -37,6 +37,8 @@ namespace MyApp_backend.Infrastructure.Data
         public DbSet<EmergencyAlert> EmergencyAlerts { get; set; }
         public DbSet<SafetyTip> SafetyTips { get; set; }
 
+        public DbSet<Notification> Notifications { get; set; }
+
 
 
 
