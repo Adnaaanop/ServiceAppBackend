@@ -1,13 +1,12 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
+using MyApp_backend.Application.DTOs.Notification;
 using MyApp_backend.Application.Interfaces;
 using MyApp_backend.Domain.Entities;
 using MyApp_backend.Domain.Enums;
 using MyApp_backend.Domain.Interfaces;
-using MyApp_backend.Application.DTOs.Notification;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MyApp_backend.Application.Services
@@ -16,21 +15,37 @@ namespace MyApp_backend.Application.Services
     {
         private readonly INotificationRepository _repository;
         private readonly IMapper _mapper;
+        private readonly IRealTimeNotifier _notifier; // INTERFACE, not SignalR
+        private readonly ILogger<NotificationService> _logger;
 
-        public NotificationService(INotificationRepository repository, IMapper mapper)
+        public NotificationService(
+            INotificationRepository repository,
+            IMapper mapper,
+            IRealTimeNotifier notifier,
+            ILogger<NotificationService> logger)
         {
             _repository = repository;
             _mapper = mapper;
+            _notifier = notifier;
+            _logger = logger;
         }
 
-        // Create a new notification
         public async Task<NotificationResponseDto> CreateAsync(NotificationCreateDto dto)
         {
+            _logger.LogInformation("[NotificationService] Creating notification for: UserId={UserId}, ProviderId={ProviderId}", dto.RecipientUserId, dto.RecipientProviderId);
+
             var entity = _mapper.Map<Notification>(dto);
             entity.DateCreated = DateTime.UtcNow;
             entity.Status = NotificationStatus.Pending;
-
             var created = await _repository.AddAsync(entity);
+
+            string recipientId = entity.RecipientUserId?.ToString() ?? entity.RecipientProviderId?.ToString();
+            if (!string.IsNullOrEmpty(recipientId))
+            {
+                _logger.LogInformation("[NotificationService] Invoking real-time notifier for: {RecipientId}", recipientId);
+                await _notifier.NotifyUserAsync(recipientId, _mapper.Map<NotificationResponseDto>(created));
+            }
+
             return _mapper.Map<NotificationResponseDto>(created);
         }
 

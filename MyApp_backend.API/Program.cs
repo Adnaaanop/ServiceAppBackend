@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MyApp_backend.API.Hubs;
+using MyApp_backend.API.SignalR;
 using MyApp_backend.Application.DTOs.Booking;
 using MyApp_backend.Application.DTOs.Catalog;
 using MyApp_backend.Application.DTOs.Message;
@@ -58,7 +59,22 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(key),
         ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
+        ClockSkew = TimeSpan.Zero,
+        NameClaimType = "sub"
+    };
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notificationsHub"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
     };
 });
 
@@ -92,6 +108,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IWarrantyRequestService, WarrantyRequestService>();
 builder.Services.AddScoped<IEmergencyAlertService, EmergencyAlertService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IRealTimeNotifier, SignalRNotifier>();
 
 
 // Add this in your Program.cs before building the app
@@ -154,12 +171,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyAllowSpecificOrigins",
-        b => b.WithOrigins("http://localhost:5173")
+        b => b.WithOrigins("http://localhost:4200")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials());
 });
-
 
 builder.Services.AddSignalR();
 
@@ -189,6 +205,7 @@ app.MapControllers();
 app.MapHub<ChatHub>("/chathub");
 app.MapHub<EmergencyAlertHub>("/emergencyAlertHub");
 app.MapHub<NotificationsHub>("/notificationsHub");
+
 
 using (var scope = app.Services.CreateScope())
 {
