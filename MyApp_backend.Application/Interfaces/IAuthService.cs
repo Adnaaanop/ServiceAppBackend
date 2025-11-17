@@ -12,7 +12,7 @@ namespace MyApp_backend.Application.Interfaces
     {
         Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto);
         Task<AuthResponseDto> LoginAsync(LoginDto loginDto);
-        Task<AuthResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request);
+        Task<AuthResponseDto> RefreshTokenAsync(string refreshToken);
         string GenerateToken(UserModel user);
 
         Task<Result> SendOtpAsync(string email);

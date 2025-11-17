@@ -27,32 +27,29 @@ namespace MyApp_backend.API.Controllers
             if (!result.IsSuccess)
                 return Unauthorized(new ApiResponse<object>(false, null, "Invalid login credentials"));
 
-            var responseData = new
-            {
-                result.Token,
-                result.RefreshToken,
-                result.Errors
-            };
+            // Set refresh token as HttpOnly secure cookie
+            SetRefreshTokenCookie(result.RefreshToken);
 
-            return Ok(new ApiResponse<object>(true, responseData, "Login successful"));
+            // Return access token in response body
+            return Ok(new ApiResponse<object>(true, new { Token = result.Token }, "Login successful"));
         }
 
         [HttpPost("refresh-token")]
-        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto request)
+        public async Task<IActionResult> RefreshToken()
         {
-            var response = await _authService.RefreshTokenAsync(request);
+            // Read refresh token from cookie instead of request body
+            var refreshToken = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(refreshToken))
+                return Unauthorized(new ApiResponse<object>(false, null, "Refresh token is missing"));
+
+            var response = await _authService.RefreshTokenAsync(refreshToken);
 
             if (!response.IsSuccess)
                 return Unauthorized(new ApiResponse<object>(false, null, "Invalid refresh token"));
 
-            var responseData = new
-            {
-                response.Token,
-                response.RefreshToken,
-                response.Errors
-            };
+            SetRefreshTokenCookie(response.RefreshToken);
 
-            return Ok(new ApiResponse<object>(true, responseData, "Token refreshed"));
+            return Ok(new ApiResponse<object>(true, new { Token = response.Token }, "Token refreshed"));
         }
 
         [HttpPost("forgot-password")]
@@ -96,9 +93,22 @@ namespace MyApp_backend.API.Controllers
             if (!result.IsSuccess)
                 return BadRequest(new ApiResponse<object>(false, null, string.Join(", ", result.Errors)));
 
+            Response.Cookies.Delete("refreshToken");
+
             return Ok(new ApiResponse<bool>(true, true, "Logged out successfully"));
         }
 
 
+        private void SetRefreshTokenCookie(string refreshToken)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(7)
+            };
+            Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+        }
     }
 }

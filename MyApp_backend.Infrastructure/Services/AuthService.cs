@@ -132,53 +132,16 @@ namespace MyApp_backend.Infrastructure.Services
             };
         }
 
-        public async Task<AuthResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request)
+        public async Task<AuthResponseDto> RefreshTokenAsync(string refreshToken)
         {
-            _logger.LogInformation("RefreshTokenAsync called. Token: {Token}, RefreshToken: {RefreshToken}", request.Token, request.RefreshToken);
+            // Validate refreshToken param directly, removing request.Token and request.RefreshToken.
 
-            var principal = GetPrincipalFromExpiredToken(request.Token);
-            if (principal == null)
+            // Optional: you can retrieve the user from refresh token stored in DB
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+            if (user == null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
             {
-                _logger.LogWarning("Principal extraction failed. Invalid token.");
-                return new AuthResponseDto { IsSuccess = false, Errors = new List<string> { "Invalid token" } };
-            }
-
-            // Log all claims for debugging
-            foreach (var claim in principal.Claims)
-            {
-                _logger.LogInformation($"Claim Type: {claim.Type}, Value: {claim.Value}");
-            }
-
-            // Fallback claim extraction for user ID
-            var userIdString = principal.FindFirstValue(JwtRegisteredClaimNames.Sub)
-                ?? principal.FindFirstValue(ClaimTypes.NameIdentifier)
-                ?? principal.Claims.FirstOrDefault(c => c.Type.EndsWith("nameidentifier"))?.Value;
-
-            _logger.LogInformation("Extracted userIdString from token: {UserIdString}", userIdString);
-
-            if (string.IsNullOrWhiteSpace(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
-            {
-                _logger.LogWarning("User ID claim missing or cannot be parsed. Value: {UserIdString}", userIdString);
-                return new AuthResponseDto { IsSuccess = false, Errors = new List<string> { "Invalid or missing user ID in token" } };
-            }
-
-            var user = await _userManager.FindByIdAsync(userId.ToString());
-            _logger.LogInformation("User lookup result: {User}", user);
-
-            if (user == null)
-            {
-                _logger.LogWarning("User not found for ID: {UserId}", userId);
-            }
-            else
-            {
-                _logger.LogInformation("DB RefreshToken: {DBRefreshToken}, Request RefreshToken: {RequestRefreshToken}", user.RefreshToken, request.RefreshToken);
-                _logger.LogInformation("DB RefreshTokenExpiryTime: {ExpiryTime} Current UTC: {Now}", user.RefreshTokenExpiryTime, DateTime.UtcNow);
-            }
-
-            if (user == null || user.RefreshToken != request.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
-            {
-                _logger.LogWarning("Refresh token request rejected. Matching: {MatchRefreshToken}, Expiry valid: {ExpiryValid}", user?.RefreshToken == request.RefreshToken, user?.RefreshTokenExpiryTime > DateTime.UtcNow);
-                return new AuthResponseDto { IsSuccess = false, Errors = new List<string> { "Invalid refresh request" } };
+                return new AuthResponseDto { IsSuccess = false, Errors = new List<string> { "Invalid refresh token" } };
             }
 
             var userModel = await MapToUserModel(user);
@@ -189,10 +152,9 @@ namespace MyApp_backend.Infrastructure.Services
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
             await _userManager.UpdateAsync(user);
 
-            _logger.LogInformation("Refresh token updated for user. New refresh token: {NewRefreshToken}", newRefreshToken);
-
             return new AuthResponseDto { IsSuccess = true, Token = newJwtToken, RefreshToken = newRefreshToken };
         }
+
 
 
         private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
