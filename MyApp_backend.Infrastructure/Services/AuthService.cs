@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using MyApp_backend.Application.DTOs.Authentication;
 using MyApp_backend.Application.Helpers;
@@ -27,6 +28,7 @@ namespace MyApp_backend.Infrastructure.Services
         private readonly IProviderRepository _providerRepository;
         private readonly IEmailService _emailService;
         private readonly MyAppDbContext _context;
+        private readonly ILogger<AuthService> _logger;
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
@@ -34,7 +36,8 @@ namespace MyApp_backend.Infrastructure.Services
             IConfiguration configuration,
             IProviderRepository providerRepository,
             IEmailService emailService,
-            MyAppDbContext context)
+            MyAppDbContext context,
+            ILogger<AuthService> logger)
         {
             _userManager = userManager;
             _jwtTokenHelper = jwtTokenHelper;
@@ -42,6 +45,7 @@ namespace MyApp_backend.Infrastructure.Services
             _providerRepository = providerRepository;
             _emailService = emailService;
             _context = context;
+            _logger = logger;
         }
 
         public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
@@ -130,15 +134,50 @@ namespace MyApp_backend.Infrastructure.Services
 
         public async Task<AuthResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request)
         {
+            _logger.LogInformation("RefreshTokenAsync called. Token: {Token}, RefreshToken: {RefreshToken}", request.Token, request.RefreshToken);
+
             var principal = GetPrincipalFromExpiredToken(request.Token);
             if (principal == null)
+            {
+                _logger.LogWarning("Principal extraction failed. Invalid token.");
                 return new AuthResponseDto { IsSuccess = false, Errors = new List<string> { "Invalid token" } };
+            }
 
-            var userId = Guid.Parse(principal.FindFirstValue(JwtRegisteredClaimNames.Sub));
+            // Log all claims for debugging
+            foreach (var claim in principal.Claims)
+            {
+                _logger.LogInformation($"Claim Type: {claim.Type}, Value: {claim.Value}");
+            }
+
+            // Fallback claim extraction for user ID
+            var userIdString = principal.FindFirstValue(JwtRegisteredClaimNames.Sub)
+                ?? principal.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? principal.Claims.FirstOrDefault(c => c.Type.EndsWith("nameidentifier"))?.Value;
+
+            _logger.LogInformation("Extracted userIdString from token: {UserIdString}", userIdString);
+
+            if (string.IsNullOrWhiteSpace(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
+            {
+                _logger.LogWarning("User ID claim missing or cannot be parsed. Value: {UserIdString}", userIdString);
+                return new AuthResponseDto { IsSuccess = false, Errors = new List<string> { "Invalid or missing user ID in token" } };
+            }
+
             var user = await _userManager.FindByIdAsync(userId.ToString());
+            _logger.LogInformation("User lookup result: {User}", user);
+
+            if (user == null)
+            {
+                _logger.LogWarning("User not found for ID: {UserId}", userId);
+            }
+            else
+            {
+                _logger.LogInformation("DB RefreshToken: {DBRefreshToken}, Request RefreshToken: {RequestRefreshToken}", user.RefreshToken, request.RefreshToken);
+                _logger.LogInformation("DB RefreshTokenExpiryTime: {ExpiryTime} Current UTC: {Now}", user.RefreshTokenExpiryTime, DateTime.UtcNow);
+            }
 
             if (user == null || user.RefreshToken != request.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
             {
+                _logger.LogWarning("Refresh token request rejected. Matching: {MatchRefreshToken}, Expiry valid: {ExpiryValid}", user?.RefreshToken == request.RefreshToken, user?.RefreshTokenExpiryTime > DateTime.UtcNow);
                 return new AuthResponseDto { IsSuccess = false, Errors = new List<string> { "Invalid refresh request" } };
             }
 
@@ -150,8 +189,11 @@ namespace MyApp_backend.Infrastructure.Services
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
             await _userManager.UpdateAsync(user);
 
+            _logger.LogInformation("Refresh token updated for user. New refresh token: {NewRefreshToken}", newRefreshToken);
+
             return new AuthResponseDto { IsSuccess = true, Token = newJwtToken, RefreshToken = newRefreshToken };
         }
+
 
         private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
         {

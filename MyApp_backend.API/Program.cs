@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MyApp_backend.API.Hubs;
+using MyApp_backend.API.Middleware;
 using MyApp_backend.API.SignalR;
 using MyApp_backend.Application.DTOs.Booking;
 using MyApp_backend.Application.DTOs.Catalog;
@@ -49,7 +50,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = true; // Change to false in development if needed
+    options.RequireHttpsMetadata = true; 
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -193,6 +194,7 @@ app.UseHttpsRedirection();
 app.UseCors("MyAllowSpecificOrigins");
 app.UseAuthentication();
 
+app.UseMiddleware<ExceptionMiddleware>();
 
 
 
