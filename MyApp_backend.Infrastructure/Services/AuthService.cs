@@ -248,7 +248,7 @@ namespace MyApp_backend.Infrastructure.Services
             return new Result { IsSuccess = true, Message = "OTP sent successfully." };
         }
 
-        public async Task<Result> ResetPasswordWithOtpAsync(string email, string otp, string newPassword, string confirmPassword)
+        public async Task<Result> VerifyOtpAsync(string email, string otp)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
@@ -259,20 +259,50 @@ namespace MyApp_backend.Infrastructure.Services
             if (userOtp == null || userOtp.OtpCode != otp || DateTime.UtcNow > userOtp.OtpExpiry)
                 return new Result { IsSuccess = false, Errors = new List<string> { "OTP is invalid or expired." } };
 
+            return new Result { IsSuccess = true, Message = "OTP verified." };
+        }
+
+        public async Task<Result> ResetPasswordAsync(string email, string newPassword, string confirmPassword)
+        {
             if (newPassword != confirmPassword)
                 return new Result { IsSuccess = false, Errors = new List<string> { "Passwords do not match." } };
 
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return new Result { IsSuccess = false, Errors = new List<string> { "User not found." } };
+
+            // Optionally verify OTP here again or rely on frontend logic token
+            // Generate password reset token
             var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
             var result = await _userManager.ResetPasswordAsync(user, resetToken, newPassword);
 
             if (!result.Succeeded)
                 return new Result { IsSuccess = false, Errors = result.Errors.Select(e => e.Description).ToList() };
 
-            // Remove used OTP entry
-            _context.UserOtps.Remove(userOtp);
-            await _context.SaveChangesAsync();
+            // Remove OTP since password reset completed
+            var userOtp = await _context.UserOtps.FirstOrDefaultAsync(x => x.UserId == user.Id);
+            if (userOtp != null)
+            {
+                _context.UserOtps.Remove(userOtp);
+                await _context.SaveChangesAsync();
+            }
 
             return new Result { IsSuccess = true, Message = "Password reset successfully." };
         }
+
+        public async Task<Result> LogoutAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return new Result { IsSuccess = false, Errors = new List<string> { "User not found." } };
+
+            user.RefreshToken = null;
+            user.RefreshTokenExpiryTime = DateTime.MinValue;
+            await _userManager.UpdateAsync(user);
+
+            return new Result { IsSuccess = true, Message = "Logged out successfully." };
+        }
+
+
     }
 }

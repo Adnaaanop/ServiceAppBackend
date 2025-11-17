@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MyApp_backend.Application.DTOs;
 using MyApp_backend.Application.DTOs.Authentication;
 using MyApp_backend.Application.Interfaces;
+using System.Security.Claims;
 
 namespace MyApp_backend.API.Controllers
 {
@@ -57,22 +59,46 @@ namespace MyApp_backend.API.Controllers
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto request)
         {
             var result = await _authService.SendOtpAsync(request.Email);
-
             if (!result.IsSuccess)
-                return BadRequest(new ApiResponse<object>(false, null, "Failed to send OTP"));
+                return BadRequest(new ApiResponse<object>(false, null, string.Join(", ", result.Errors)));
 
             return Ok(new ApiResponse<object>(true, null, "OTP sent successfully"));
         }
 
-        [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword([FromBody] VerifyOtpRequestDto request)
+        [HttpPost("verify-otp")]
+        public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpRequestDto request)
         {
-            var result = await _authService.ResetPasswordWithOtpAsync(request.Email, request.Otp, request.NewPassword, request.ConfirmPassword);
-
+            var result = await _authService.VerifyOtpAsync(request.Email, request.Otp);
             if (!result.IsSuccess)
-                return BadRequest(new ApiResponse<object>(false, null, "Password reset failed"));
+                return BadRequest(new ApiResponse<object>(false, null, string.Join(", ", result.Errors)));
 
-            return Ok(new ApiResponse<object>(true, null, "Password reset successful"));
+            return Ok(new ApiResponse<object>(true, null, "OTP verified successfully"));
         }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto request)
+        {
+            var result = await _authService.ResetPasswordAsync(request.Email, request.NewPassword, request.ConfirmPassword);
+            if (!result.IsSuccess)
+                return BadRequest(new ApiResponse<object>(false, null, string.Join(", ", result.Errors)));
+
+            return Ok(new ApiResponse<object>(true, null, "Password reset successfully"));
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return Unauthorized();
+
+            var result = await _authService.LogoutAsync(userId);
+            if (!result.IsSuccess)
+                return BadRequest(new ApiResponse<object>(false, null, string.Join(", ", result.Errors)));
+
+            return Ok(new ApiResponse<bool>(true, true, "Logged out successfully"));
+        }
+
+
     }
 }

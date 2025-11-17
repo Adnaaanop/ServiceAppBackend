@@ -16,7 +16,13 @@ namespace MyApp_backend.Application.Interfaces
         string GenerateToken(UserModel user);
 
         Task<Result> SendOtpAsync(string email);
-        Task<Result> ResetPasswordWithOtpAsync(string email, string otp, string newPassword, string confirmPassword);
+        // Add a new separate method for OTP verification
+        Task<Result> VerifyOtpAsync(string email, string otp);
+
+        // Update reset password method without OTP since that is verified separately
+        Task<Result> ResetPasswordAsync(string email, string newPassword, string confirmPassword);
+
+        Task<Result> LogoutAsync(string userId);
 
     }
 }

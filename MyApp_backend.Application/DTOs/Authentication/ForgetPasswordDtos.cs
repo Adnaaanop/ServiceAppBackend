@@ -15,7 +15,12 @@ namespace MyApp_backend.Application.DTOs.Authentication
     {
         public string Email { get; set; }
         public string Otp { get; set; }
+    }
+    public class ResetPasswordRequestDto
+    {
+        public string Email { get; set; }
         public string NewPassword { get; set; }
         public string ConfirmPassword { get; set; }
     }
+
 }
