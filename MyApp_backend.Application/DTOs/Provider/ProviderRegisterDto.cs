@@ -37,9 +37,9 @@ namespace MyApp_backend.Application.DTOs.Provider
         public List<string> ServiceCategories { get; set; } = new();
 
         // Step 3: Credentials/Certificates/Docs (upload links instead of uploads)
-        public List<string>? CertificateUrls { get; set; }
-        public List<string>? LicenseUrls { get; set; }
-        public List<string>? DocumentUrls { get; set; }
+        public List<IFormFile>? CertificateFiles { get; set; }
+        public List<IFormFile>? LicenseFiles { get; set; }
+        public List<IFormFile>? DocumentFiles { get; set; }
 
         // Step 4: Service Areas
         public List<string>? ServiceAreas { get; set; }

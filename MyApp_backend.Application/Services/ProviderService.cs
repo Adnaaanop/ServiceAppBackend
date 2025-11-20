@@ -54,36 +54,71 @@ namespace MyApp_backend.Application.Services
             // 2. Assign "Provider" role
             await _userManager.AddToRoleAsync(user, "Provider");
 
-            // 3. Prepare profile entity from DTO fields
+            // 3. Prepare profile entity
             var providerProfile = new ProviderProfile
             {
                 UserId = user.Id,
                 BusinessName = dto.BusinessName,
                 BusinessDescription = dto.BusinessDescription ?? "",
-                ServiceCategoriesJson = JsonSerializer.Serialize(dto.ServiceCategories ?? new List<string>()),
-                CertificateUrlsJson = JsonSerializer.Serialize(dto.CertificateUrls ?? new List<string>()),
-                LicenseUrlsJson = JsonSerializer.Serialize(dto.LicenseUrls ?? new List<string>()),
-                DocumentUrlsJson = JsonSerializer.Serialize(dto.DocumentUrls ?? new List<string>()),
-                ServiceAreasJson = JsonSerializer.Serialize(dto.ServiceAreas ?? new List<string>()),
-                AvailabilityJson = dto.AvailabilityJson,
                 IsApproved = false,
                 CreatedAt = DateTime.UtcNow,
                 IsDeleted = false,
-                IsActive = true
-                // ProfilePhotoUrl is set below
+                IsActive = true,
+                AvailabilityJson = dto.AvailabilityJson
+                // ProfilePhotoUrl/CertificateUrls/Licenses/Docs set below
             };
 
-            // 4. Upload and assign profile photo if provided
+            // 4. Profile photo upload
             if (dto.ProfilePhoto != null && dto.ProfilePhoto.Length > 0)
             {
                 var url = await _cloudinaryService.UploadImageAsync(dto.ProfilePhoto);
                 providerProfile.ProfilePhotoUrl = url;
             }
 
-            // 5. Save the provider profile
+            // 5. Certificate files upload
+            var certificateUrls = new List<string>();
+            if (dto.CertificateFiles != null)
+            {
+                foreach (var file in dto.CertificateFiles)
+                {
+                    var url = await _cloudinaryService.UploadImageAsync(file);
+                    certificateUrls.Add(url);
+                }
+            }
+            providerProfile.CertificateUrlsJson = JsonSerializer.Serialize(certificateUrls);
+
+            // 6. License files upload
+            var licenseUrls = new List<string>();
+            if (dto.LicenseFiles != null)
+            {
+                foreach (var file in dto.LicenseFiles)
+                {
+                    var url = await _cloudinaryService.UploadImageAsync(file);
+                    licenseUrls.Add(url);
+                }
+            }
+            providerProfile.LicenseUrlsJson = JsonSerializer.Serialize(licenseUrls);
+
+            // 7. Document files upload
+            var documentUrls = new List<string>();
+            if (dto.DocumentFiles != null)
+            {
+                foreach (var file in dto.DocumentFiles)
+                {
+                    var url = await _cloudinaryService.UploadImageAsync(file);
+                    documentUrls.Add(url);
+                }
+            }
+            providerProfile.DocumentUrlsJson = JsonSerializer.Serialize(documentUrls);
+
+            // 8. Service categories and areas (serialize text values)
+            providerProfile.ServiceCategoriesJson = JsonSerializer.Serialize(dto.ServiceCategories ?? new List<string>());
+            providerProfile.ServiceAreasJson = JsonSerializer.Serialize(dto.ServiceAreas ?? new List<string>());
+
+            // 9. Save the provider profile
             await _providerRepo.AddAsync(providerProfile);
 
-            // 6. Optionally verify: did profile save?
+            // 10. Optionally verify profile was saved
             var profileCheck = await _providerRepo.GetByUserIdAsync(user.Id);
             if (profileCheck == null)
                 throw new Exception("Provider profile creation failed. Please contact support.");

@@ -14,7 +14,6 @@ namespace MyApp_backend.Application.DTOs.Catalog
         public string? Description { get; set; }
         public string PricingJson { get; set; }
         public string? AvailabilityScheduleJson { get; set; }
-        public string? MediaUrlsJson { get; set; }
         public List<IFormFile>? MediaFiles { get; set; }
     }
 
@@ -24,7 +23,6 @@ namespace MyApp_backend.Application.DTOs.Catalog
         public string? Description { get; set; }
         public string PricingJson { get; set; }
         public string? AvailabilityScheduleJson { get; set; }
-        public string? MediaUrlsJson { get; set; }
         public bool IsApproved { get; set; }
         public List<IFormFile>? MediaFiles { get; set; }
     }
