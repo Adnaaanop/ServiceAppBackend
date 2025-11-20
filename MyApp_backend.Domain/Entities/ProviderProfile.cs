@@ -18,7 +18,7 @@ namespace MyApp_backend.Domain.Entities
 
         public string? BusinessDescription { get; set; }
 
-        // For simplicity, storing categories, services areas, and file URLs as JSON strings
+        // For simplicity, storing categories, services areas, and file URLs as JSON string
         public string ServiceCategoriesJson { get; set; } = "[]";
 
         public string CertificateUrlsJson { get; set; } = "[]";
