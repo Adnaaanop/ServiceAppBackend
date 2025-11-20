@@ -15,6 +15,7 @@ using MyApp_backend.Application.Helpers;
 using MyApp_backend.Application.Interfaces;
 using MyApp_backend.Application.Mapping;
 using MyApp_backend.Application.Services;
+using MyApp_backend.Application.Settings;
 using MyApp_backend.Domain.Entities;
 using MyApp_backend.Domain.Entities.Catalog;
 using MyApp_backend.Domain.Entities.Payment;
@@ -82,6 +83,9 @@ builder.Services.AddAuthentication(options =>
 // Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<JwtTokenHelper>();
+builder.Services.Configure<CloudinarySettings>(
+    builder.Configuration.GetSection("CloudinarySettings"));
+builder.Services.AddSingleton<ICloudinaryService, CloudinaryService>();
 
 
 //Repository

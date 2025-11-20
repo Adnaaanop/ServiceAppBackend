@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,7 @@ namespace MyApp_backend.Application.DTOs.Catalog
         public string PricingJson { get; set; }
         public string? AvailabilityScheduleJson { get; set; }
         public string? MediaUrlsJson { get; set; }
+        public List<IFormFile>? MediaFiles { get; set; }
     }
 
     public class ServiceUpdateDto
@@ -24,6 +26,7 @@ namespace MyApp_backend.Application.DTOs.Catalog
         public string? AvailabilityScheduleJson { get; set; }
         public string? MediaUrlsJson { get; set; }
         public bool IsApproved { get; set; }
+        public List<IFormFile>? MediaFiles { get; set; }
     }
 
     public class ServiceResponseDto

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -45,5 +46,7 @@ namespace MyApp_backend.Application.DTOs.Provider
 
         // Step 5: Availability Schedule (as JSON string or custom object)
         public string? AvailabilityJson { get; set; }
+
+        public IFormFile? ProfilePhoto { get; set; }
     }
 }

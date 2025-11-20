@@ -13,6 +13,8 @@ namespace MyApp_backend.Domain.Entities
         [Key, ForeignKey(nameof(User))]
         public Guid UserId { get; set; }  // PK and FK to ApplicationUser
 
+        public string? ProfilePhotoUrl { get; set; }
+
         [Required]
         public string BusinessName { get; set; } = null!;
 

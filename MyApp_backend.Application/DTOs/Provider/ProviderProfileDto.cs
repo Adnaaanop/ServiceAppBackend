@@ -17,5 +17,7 @@ namespace MyApp_backend.Application.DTOs.Provider
         public List<string>? ServiceAreas { get; set; }
         public string? AvailabilityJson { get; set; }
         public bool IsApproved { get; set; }
+
+        public string? ProfilePhotoUrl { get; set; }
     }
 }

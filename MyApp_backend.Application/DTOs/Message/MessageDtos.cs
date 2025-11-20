@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,7 @@ namespace MyApp_backend.Application.DTOs.Message
         public Guid ReceiverId { get; set; }
         public string MessageText { get; set; }
         public string? MediaUrl { get; set; }
+        public IFormFile? MediaFile { get; set; }
     }
 
     // MessageResponseDto.cs

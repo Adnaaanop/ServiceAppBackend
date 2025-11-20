@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,5 +14,6 @@ namespace MyApp_backend.Application.DTOs.Provider
         public List<string> ServiceCategories { get; set; }
         public List<string>? ServiceAreas { get; set; }
         public string? AvailabilityJson { get; set; }
+        public IFormFile? ProfilePhoto { get; set; }
     }
 }

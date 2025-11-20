@@ -19,7 +19,7 @@ namespace MyApp_backend.API.Controllers
         // POST: api/Provider/register
         [HttpPost("register")]
         [AllowAnonymous]
-        public async Task<IActionResult> Register([FromBody] ProviderRegisterDto dto)
+        public async Task<IActionResult> Register([FromForm] ProviderRegisterDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -62,7 +62,7 @@ namespace MyApp_backend.API.Controllers
         // PUT: api/Provider/profile/{userId}
         [HttpPut("profile/{userId:guid}")]
         [Authorize(Roles = "Provider,Admin")]
-        public async Task<IActionResult> UpdateProfile(Guid userId, [FromBody] ProviderUpdateDto dto)
+        public async Task<IActionResult> UpdateProfile(Guid userId, [FromForm] ProviderUpdateDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var result = await _providerService.UpdateProfileAsync(userId, dto);
