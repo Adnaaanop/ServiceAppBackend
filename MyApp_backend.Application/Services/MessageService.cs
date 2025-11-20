@@ -6,7 +6,6 @@ using MyApp_backend.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MyApp_backend.Application.Services
@@ -15,17 +14,31 @@ namespace MyApp_backend.Application.Services
     {
         private readonly IGenericRepository<Message> _repo;
         private readonly IMapper _mapper;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public MessageService(IGenericRepository<Message> repo, IMapper mapper)
+        public MessageService(
+            IGenericRepository<Message> repo,
+            IMapper mapper,
+            ICloudinaryService cloudinaryService // Inject Cloudinary service
+        )
         {
             _repo = repo;
             _mapper = mapper;
+            _cloudinaryService = cloudinaryService;
         }
 
         public async Task<MessageResponseDto> CreateAsync(MessageCreateDto dto)
         {
             var message = _mapper.Map<Message>(dto);
             message.Timestamp = DateTime.UtcNow;
+
+            // Handle file upload if present
+            if (dto.MediaFile != null && dto.MediaFile.Length > 0)
+            {
+                var url = await _cloudinaryService.UploadImageAsync(dto.MediaFile);
+                message.MediaUrl = url;
+            }
+
             var created = await _repo.AddAsync(message);
             return _mapper.Map<MessageResponseDto>(created);
         }
@@ -43,7 +56,6 @@ namespace MyApp_backend.Application.Services
             return messages.Select(m => _mapper.Map<MessageResponseDto>(m));
         }
 
-        // Update is unused; returns NotImplementedException
         public Task<MessageResponseDto?> UpdateAsync(Guid id, object dto)
         {
             throw new NotImplementedException();
@@ -54,7 +66,6 @@ namespace MyApp_backend.Application.Services
             return await _repo.DeleteAsync(id);
         }
 
-        // Optional: Fetch messages for a booking (add to interface if needed)
         public async Task<IEnumerable<MessageResponseDto>> GetMessagesByBookingAsync(Guid bookingId)
         {
             var messages = await _repo.FindAsync(m => m.BookingId == bookingId);

@@ -14,7 +14,6 @@ namespace MyApp_backend.Application.DTOs.Message
         public Guid SenderId { get; set; }
         public Guid ReceiverId { get; set; }
         public string MessageText { get; set; }
-        public string? MediaUrl { get; set; }
         public IFormFile? MediaFile { get; set; }
     }
 

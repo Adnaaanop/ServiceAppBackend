@@ -4,6 +4,8 @@ using MyApp_backend.Application.DTOs.Message;
 using MyApp_backend.Application.Interfaces;
 using MyApp_backend.Application.Services;
 using MyApp_backend.Domain.Entities;
+using System;
+using System.Threading.Tasks;
 
 namespace MyApp_backend.API.Controllers
 {
@@ -19,7 +21,7 @@ namespace MyApp_backend.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SendMessage(MessageCreateDto dto)
+        public async Task<IActionResult> SendMessage([FromForm] MessageCreateDto dto) // Use [FromForm] for files!
         {
             var result = await _messageService.CreateAsync(dto);
             return CreatedAtAction(nameof(GetMessage), new { id = result.Id }, result);
