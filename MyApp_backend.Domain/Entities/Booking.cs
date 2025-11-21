@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MyApp_backend.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,7 @@ namespace MyApp_backend.Domain.Entities
         public decimal? EstimatedCost { get; set; }
         public decimal? ActualCost { get; set; }
 
+        //public BookingStatus Status { get; set; }
         // Add this navigation property:
         public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
     }

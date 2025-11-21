@@ -104,7 +104,7 @@ builder.Services.AddScoped<IProviderService, ProviderService>();
 builder.Services.AddScoped<IGenericService<UserRequestDto, UserUpdateDto, UserResponseDto, ApplicationUser>, UserService>();
 builder.Services.AddScoped<IGenericService<ServiceCategoryCreateDto, ServiceCategoryUpdateDto, ServiceCategoryResponseDto, ServiceCategory>, ServiceCategoryService>();
 builder.Services.AddScoped<IGenericService<ServiceCreateDto, ServiceUpdateDto, ServiceResponseDto, Service>, ServiceService>();
-builder.Services.AddScoped<IGenericService<BookingCreateDto, BookingUpdateDto, BookingResponseDto, Booking>, BookingService>();
+builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IPaymentService, RazorpayPaymentService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();

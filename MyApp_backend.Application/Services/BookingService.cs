@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace MyApp_backend.Application.Services
 {
-    public class BookingService : IGenericService<BookingCreateDto, BookingUpdateDto, BookingResponseDto, Booking>
+    public class BookingService : IBookingService
     {
         private readonly IGenericRepository<Booking> _repository;
         private readonly IMapper _mapper;
@@ -54,6 +54,31 @@ namespace MyApp_backend.Application.Services
             if (entity == null) return null;
 
             _mapper.Map(dto, entity);
+            var updated = await _repository.UpdateAsync(entity);
+            return _mapper.Map<BookingResponseDto>(updated);
+        }
+
+        // ---- CUSTOM ADDED METHODS ----
+
+        public async Task<IEnumerable<BookingResponseDto>> GetByUserIdAsync(Guid userId)
+        {
+            var list = await _repository.GetAllAsync();
+            var filtered = list.Where(b => b.UserId == userId).ToList();
+            return _mapper.Map<IEnumerable<BookingResponseDto>>(filtered);
+        }
+
+        public async Task<IEnumerable<BookingResponseDto>> GetByProviderIdAsync(Guid providerId)
+        {
+            var list = await _repository.GetAllAsync();
+            var filtered = list.Where(b => b.ProviderId == providerId).ToList();
+            return _mapper.Map<IEnumerable<BookingResponseDto>>(filtered);
+        }
+
+        public async Task<BookingResponseDto?> UpdateStatusAsync(Guid bookingId, string status)
+        {
+            var entity = await _repository.GetByIdAsync(bookingId);
+            if (entity == null) return null;
+            entity.Status = status;
             var updated = await _repository.UpdateAsync(entity);
             return _mapper.Map<BookingResponseDto>(updated);
         }
