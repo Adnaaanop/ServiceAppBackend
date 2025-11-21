@@ -14,9 +14,15 @@ namespace MyApp_backend.Application.Mapping
     {
         public BookingProfile()
         {
-            CreateMap<BookingCreateDto, Booking>();
-            CreateMap<BookingUpdateDto, Booking>();
-            CreateMap<Booking, BookingResponseDto>();
+            CreateMap<Booking, BookingResponseDto>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+
+            CreateMap<BookingCreateDto, Booking>()
+                // On create, status defaults to Pending in your service, so not mapped here
+                .ForMember(dest => dest.Status, opt => opt.Ignore());
+
+            CreateMap<BookingUpdateDto, Booking>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
         }
     }
 }

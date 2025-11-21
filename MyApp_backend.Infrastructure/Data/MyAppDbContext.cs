@@ -152,7 +152,9 @@ namespace MyApp_backend.Infrastructure.Data
                         entity.Property(e => e.Content).IsRequired();
                     });
 
-
+                    builder.Entity<Booking>()
+                        .Property(b => b.Status)
+                        .HasConversion<string>();
 
             //SEEDING
             // Sample provider user seed

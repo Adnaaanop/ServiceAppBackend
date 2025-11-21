@@ -18,17 +18,15 @@ namespace MyApp_backend.Application.DTOs.Booking
         public decimal? EstimatedCost { get; set; }
     }
 
-    // Used when updating a booking (e.g., reschedule, change status)
     public class BookingUpdateDto
     {
         public DateTime TimeSlotStart { get; set; }
         public DateTime? TimeSlotEnd { get; set; }
-        public string Status { get; set; }
+        public MyApp_backend.Domain.Enums.BookingStatus Status { get; set; } // Use enum here
         public string Location { get; set; }
         public decimal? ActualCost { get; set; }
     }
 
-    // Data sent to clients (response)
     public class BookingResponseDto
     {
         public Guid Id { get; set; }
@@ -37,7 +35,7 @@ namespace MyApp_backend.Application.DTOs.Booking
         public Guid ServiceId { get; set; }
         public DateTime TimeSlotStart { get; set; }
         public DateTime? TimeSlotEnd { get; set; }
-        public string Status { get; set; }
+        public string Status { get; set; } // Send string to frontend
         public string Location { get; set; }
         public decimal? EstimatedCost { get; set; }
         public decimal? ActualCost { get; set; }

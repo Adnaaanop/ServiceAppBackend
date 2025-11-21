@@ -6,7 +6,6 @@ using MyApp_backend.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MyApp_backend.Application.Services
@@ -25,7 +24,7 @@ namespace MyApp_backend.Application.Services
         public async Task<BookingResponseDto> CreateAsync(BookingCreateDto dto)
         {
             var entity = _mapper.Map<Booking>(dto);
-            entity.Status = string.IsNullOrEmpty(entity.Status) ? "Pending" : entity.Status;
+            entity.Status = MyApp_backend.Domain.Enums.BookingStatus.Pending; // Always set Pending on create
             var created = await _repository.AddAsync(entity);
             return _mapper.Map<BookingResponseDto>(created);
         }
@@ -53,7 +52,7 @@ namespace MyApp_backend.Application.Services
             var entity = await _repository.GetByIdAsync(id);
             if (entity == null) return null;
 
-            _mapper.Map(dto, entity);
+            _mapper.Map(dto, entity); // BookingUpdateDto.Status is enum, so mapping is direct
             var updated = await _repository.UpdateAsync(entity);
             return _mapper.Map<BookingResponseDto>(updated);
         }
@@ -78,7 +77,18 @@ namespace MyApp_backend.Application.Services
         {
             var entity = await _repository.GetByIdAsync(bookingId);
             if (entity == null) return null;
-            entity.Status = status;
+
+            // Safely parse string to enum value
+            if (Enum.TryParse<MyApp_backend.Domain.Enums.BookingStatus>(status, out var parsedStatus))
+            {
+                entity.Status = parsedStatus;
+            }
+            else
+            {
+                // Invalid input defaults to Pending or any logic you want
+                entity.Status = MyApp_backend.Domain.Enums.BookingStatus.Pending;
+            }
+
             var updated = await _repository.UpdateAsync(entity);
             return _mapper.Map<BookingResponseDto>(updated);
         }
