@@ -26,7 +26,9 @@ namespace MyApp_backend.API.Hubs
 
             var saved = await _messageService.CreateAsync(dto);
 
-            await Clients.All.SendAsync("ReceiveMessage", user, message);
+            // Broadcast only to Sender and Receiver (using userId.ToString())
+            await Clients.User(senderId.ToString()).SendAsync("ReceiveMessage", saved);
+            await Clients.User(receiverId.ToString()).SendAsync("ReceiveMessage", saved);
         }
     }
 }
