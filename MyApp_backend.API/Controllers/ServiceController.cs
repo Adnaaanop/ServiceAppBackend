@@ -4,22 +4,24 @@ using Microsoft.AspNetCore.Mvc;
 using MyApp_backend.Application.DTOs.Catalog;
 using MyApp_backend.Application.Interfaces;
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace MyApp_backend.API.Controllers
 {
+
     [Route("api/[controller]")]
     [ApiController]
     public class ServiceController : ControllerBase
     {
-        private readonly IGenericService<ServiceCreateDto, ServiceUpdateDto, ServiceResponseDto, Domain.Entities.Catalog.Service> _service;
+        private readonly IServiceService _service;
 
-        public ServiceController(
-            IGenericService<ServiceCreateDto, ServiceUpdateDto, ServiceResponseDto, Domain.Entities.Catalog.Service> service)
+        public ServiceController(IServiceService service)
         {
             _service = service;
         }
 
+        // GET: api/Service
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -27,6 +29,7 @@ namespace MyApp_backend.API.Controllers
             return Ok(services);
         }
 
+        // GET: api/Service/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
@@ -35,6 +38,22 @@ namespace MyApp_backend.API.Controllers
             return Ok(service);
         }
 
+        // GET: api/Service/my  (provider's own services)
+        [Authorize(Roles = "Provider")]
+        [HttpGet("my")]
+        public async Task<IActionResult> GetMyServices()
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString))
+                return Unauthorized();
+
+            var providerId = Guid.Parse(userIdString); // assuming Service.ProviderId == ApplicationUser.Id
+
+            var services = await _service.GetByProviderIdAsync(providerId);
+            return Ok(services);
+        }
+
+        // POST: api/Service
         [Authorize(Roles = "Provider")]
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] ServiceCreateDto dto)
@@ -43,6 +62,7 @@ namespace MyApp_backend.API.Controllers
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
+        // PUT: api/Service/{id}
         [Authorize(Roles = "Provider")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromForm] ServiceUpdateDto dto)
@@ -52,6 +72,7 @@ namespace MyApp_backend.API.Controllers
             return Ok(updated);
         }
 
+        // DELETE: api/Service/{id}
         [Authorize(Roles = "Provider")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)

@@ -16,19 +16,33 @@ namespace MyApp_backend.API.Hubs
 
         public async Task SendMessage(string user, string message, Guid bookingId, Guid senderId, Guid receiverId)
         {
-            var dto = new MessageCreateDto
+            try
             {
-                BookingId = bookingId,
-                SenderId = senderId,
-                ReceiverId = receiverId,
-                MessageText = message,
-            };
+                Console.WriteLine($"SignalR SendMessage called with: user={user}, message={message}, bookingId={bookingId}, senderId={senderId}, receiverId={receiverId}");
 
-            var saved = await _messageService.CreateAsync(dto);
+                var dto = new MessageCreateDto
+                {
+                    BookingId = bookingId,
+                    SenderId = senderId,
+                    ReceiverId = receiverId,
+                    MessageText = message,
+                };
 
-            // Broadcast only to Sender and Receiver (using userId.ToString())
-            await Clients.User(senderId.ToString()).SendAsync("ReceiveMessage", saved);
-            await Clients.User(receiverId.ToString()).SendAsync("ReceiveMessage", saved);
+                var saved = await _messageService.CreateAsync(dto);
+
+                if (saved == null) throw new Exception("Message save returned null");
+
+                Console.WriteLine($"Message saved: {saved.Id}");
+
+                await Clients.User(senderId.ToString()).SendAsync("ReceiveMessage", saved);
+                await Clients.User(receiverId.ToString()).SendAsync("ReceiveMessage", saved);
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine("SignalR SendMessage FAILED: " + ex);
+                throw;
+            }
         }
     }
 }

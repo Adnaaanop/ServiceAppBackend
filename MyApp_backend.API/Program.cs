@@ -103,7 +103,7 @@ builder.Services.AddScoped<IGenericService<MessageCreateDto, object, MessageResp
 builder.Services.AddScoped<IProviderService, ProviderService>();
 builder.Services.AddScoped<IGenericService<UserRequestDto, UserUpdateDto, UserResponseDto, ApplicationUser>, UserService>();
 builder.Services.AddScoped<IGenericService<ServiceCategoryCreateDto, ServiceCategoryUpdateDto, ServiceCategoryResponseDto, ServiceCategory>, ServiceCategoryService>();
-builder.Services.AddScoped<IGenericService<ServiceCreateDto, ServiceUpdateDto, ServiceResponseDto, Service>, ServiceService>();
+builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IPaymentService, RazorpayPaymentService>();
@@ -269,6 +269,7 @@ using (var scope = app.Services.CreateScope())
         if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
             await userManager.AddToRoleAsync(adminUser, "Admin");
         Console.WriteLine("Admin user already exists");
+        Console.WriteLine("Hello");
     }
 }
 

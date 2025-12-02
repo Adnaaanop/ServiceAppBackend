@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace MyApp_backend.Application.Services
 {
-    public class ServiceService : IGenericService<ServiceCreateDto, ServiceUpdateDto, ServiceResponseDto, Service>
+    public class ServiceService : IServiceService
     {
         private readonly IGenericRepository<Service> _repository;
         private readonly IMapper _mapper;
@@ -19,7 +19,7 @@ namespace MyApp_backend.Application.Services
         public ServiceService(
             IGenericRepository<Service> repository,
             IMapper mapper,
-            ICloudinaryService cloudinaryService // Injected for file uploads
+            ICloudinaryService cloudinaryService // for file uploads
         )
         {
             _repository = repository;
@@ -27,11 +27,12 @@ namespace MyApp_backend.Application.Services
             _cloudinaryService = cloudinaryService;
         }
 
+        // CREATE
         public async Task<ServiceResponseDto> CreateAsync(ServiceCreateDto dto)
         {
             var entity = _mapper.Map<Service>(dto);
 
-            // Handle file uploads
+            // Handle media file uploads
             var mediaUrls = new List<string>();
             if (dto.MediaFiles != null)
             {
@@ -50,6 +51,7 @@ namespace MyApp_backend.Application.Services
             return _mapper.Map<ServiceResponseDto>(created);
         }
 
+        // UPDATE
         public async Task<ServiceResponseDto?> UpdateAsync(Guid id, ServiceUpdateDto dto)
         {
             var entity = await _repository.GetByIdAsync(id);
@@ -57,7 +59,7 @@ namespace MyApp_backend.Application.Services
 
             _mapper.Map(dto, entity);
 
-            // Handle file uploads for update
+            // Replace media if new files uploaded
             if (dto.MediaFiles != null && dto.MediaFiles.Count > 0)
             {
                 var mediaUrls = new List<string>();
@@ -76,22 +78,32 @@ namespace MyApp_backend.Application.Services
             return _mapper.Map<ServiceResponseDto>(updated);
         }
 
+        // DELETE
         public async Task<bool> DeleteAsync(Guid id)
         {
             return await _repository.DeleteAsync(id);
         }
 
+        // GET ALL
         public async Task<IEnumerable<ServiceResponseDto>> GetAllAsync()
         {
             var list = await _repository.GetAllAsync();
             return _mapper.Map<IEnumerable<ServiceResponseDto>>(list);
         }
 
+        // GET BY ID
         public async Task<ServiceResponseDto?> GetByIdAsync(Guid id)
         {
             var entity = await _repository.GetByIdAsync(id);
             if (entity == null) return null;
             return _mapper.Map<ServiceResponseDto>(entity);
+        }
+
+        // NEW: GET BY PROVIDER ID (for "My Services")
+        public async Task<IEnumerable<ServiceResponseDto>> GetByProviderIdAsync(Guid providerId)
+        {
+            var list = await _repository.FindAsync(s => s.ProviderId == providerId);
+            return _mapper.Map<IEnumerable<ServiceResponseDto>>(list);
         }
     }
 }
