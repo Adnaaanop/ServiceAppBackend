@@ -47,19 +47,46 @@ namespace MyApp_backend.API.Controllers
             if (string.IsNullOrEmpty(userIdString))
                 return Unauthorized();
 
-            var providerId = Guid.Parse(userIdString); // assuming Service.ProviderId == ApplicationUser.Id
+            var providerId = Guid.Parse(userIdString); // Service.ProviderId == ApplicationUser.Id
 
             var services = await _service.GetByProviderIdAsync(providerId);
-            return Ok(services);
+
+            // Hide soft-deleted services from the provider UI
+            var activeServices = services.Where(s => !s.IsDeleted);
+
+            return Ok(activeServices);
         }
+
 
         // POST: api/Service
         [Authorize(Roles = "Provider")]
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] ServiceCreateDto dto)
         {
-            var created = await _service.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString))
+                return Unauthorized();
+
+            dto.ProviderId = Guid.Parse(userIdString); // ensure ProviderId is set
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                var created = await _service.CreateAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            }
+            catch (Exception ex)
+            {
+                // temporary: surface error while debugging
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    Message = "Failed to create service",
+                    Error = ex.Message,
+                    ex.StackTrace
+                });
+            }
         }
 
         // PUT: api/Service/{id}
