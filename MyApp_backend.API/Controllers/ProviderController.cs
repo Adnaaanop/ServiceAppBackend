@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyApp_backend.Application.DTOs.Provider;
 using MyApp_backend.Application.Interfaces;
+using System.Security.Claims;
 
 namespace MyApp_backend.API.Controllers
 {
@@ -80,6 +81,23 @@ namespace MyApp_backend.API.Controllers
             if (!result) return NotFound();
             return Ok();
         }
+
+
+        [Authorize(Roles = "Provider")]
+        [HttpGet("profile/me")]
+        public async Task<IActionResult> GetMyProfile()
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString))
+                return Unauthorized();
+
+            var userId = Guid.Parse(userIdString);
+            var profile = await _providerService.GetProfileByUserIdAsync(userId);
+            if (profile == null) return NotFound();
+            return Ok(profile);
+        }
+
+
 
         // GET: api/Provider/all
         [HttpGet("all-admin")]

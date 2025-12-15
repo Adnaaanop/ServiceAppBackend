@@ -18,7 +18,7 @@ namespace MyApp_backend.API.Controllers
             _service = service;
         }
 
-        // ---- USER/PROVIDER FILTERED ENDPOINTS ----
+         //---- USER/PROVIDER FILTERED ENDPOINTS ----
 
         // GET: api/Booking/user/{userId}
         [Authorize(Roles = "User,Admin")]
